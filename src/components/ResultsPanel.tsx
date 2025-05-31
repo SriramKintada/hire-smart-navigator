@@ -180,7 +180,7 @@ export const ResultsPanel = ({ mode, query, candidates, externalCandidates = [] 
               <Select value={sortBy} onValueChange={handleSortChange}>
                 <SelectTrigger className="w-32">
                   <SortAsc className="h-4 w-4 mr-2" />
-                  <SelectValue />
+                  <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="score">Score</SelectItem>
@@ -194,7 +194,7 @@ export const ResultsPanel = ({ mode, query, candidates, externalCandidates = [] 
               <Select value={filterBy} onValueChange={handleFilterChange}>
                 <SelectTrigger className="w-32">
                   <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue />
+                  <SelectValue placeholder="Filter by" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Scores</SelectItem>
