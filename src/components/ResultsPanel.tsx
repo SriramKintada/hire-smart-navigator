@@ -1,26 +1,38 @@
 
 import { useState } from 'react';
-import { Users, TrendingUp, Award, AlertTriangle, Filter, SortAsc } from 'lucide-react';
+import { Users, TrendingUp, Award, AlertTriangle, Filter, SortAsc, Brain, Vs, Download } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { AppMode } from '@/pages/Index';
 import { CandidateDetailPanel } from './CandidateDetailPanel';
+import { ExternalCandidatePanel } from './ExternalCandidatePanel';
+import { AIAnalysisPanel } from './AIAnalysisPanel';
+import { ComparisonPanel } from './ComparisonPanel';
 import { ProcessedCandidate } from '@/hooks/useFileProcessing';
+import { ExternalCandidate } from '@/services/githubApi';
+import { exportService } from '@/services/exportService';
 
 interface ResultsPanelProps {
   mode: AppMode;
   query: string;
   candidates: ProcessedCandidate[];
+  externalCandidates?: ExternalCandidate[];
 }
 
-export const ResultsPanel = ({ mode, query, candidates }: ResultsPanelProps) => {
+export const ResultsPanel = ({ mode, query, candidates, externalCandidates = [] }: ResultsPanelProps) => {
   const [selectedCandidate, setSelectedCandidate] = useState<ProcessedCandidate | null>(null);
+  const [selectedExternalCandidate, setSelectedExternalCandidate] = useState<ExternalCandidate | null>(null);
+  const [showAIAnalysis, setShowAIAnalysis] = useState<ProcessedCandidate | null>(null);
+  const [comparisonCandidates, setComparisonCandidates] = useState<ProcessedCandidate[]>([]);
   const [sortBy, setSortBy] = useState<'score' | 'name' | 'experience'>('score');
   const [filterBy, setFilterBy] = useState<'all' | 'high' | 'medium' | 'low'>('all');
   const [searchTerm, setSearchTerm] = useState('');
+
+  const currentCandidates = mode === 'internal' ? candidates : externalCandidates;
 
   const getScoreColor = (score: number) => {
     if (score >= 8.5) return "text-green-600 bg-green-50";
@@ -34,12 +46,38 @@ export const ResultsPanel = ({ mode, query, candidates }: ResultsPanelProps) => 
     return 'low';
   };
 
+  const handleComparisonToggle = (candidate: ProcessedCandidate) => {
+    setComparisonCandidates(prev => {
+      const exists = prev.find(c => c.id === candidate.id);
+      if (exists) {
+        return prev.filter(c => c.id !== candidate.id);
+      } else if (prev.length < 2) {
+        return [...prev, candidate];
+      }
+      return prev;
+    });
+  };
+
+  const handleExportPDF = () => {
+    exportService.exportToPDF(currentCandidates, `${mode} Candidates Report`);
+  };
+
+  const handleExportExcel = () => {
+    exportService.exportToExcel(currentCandidates);
+  };
+
   // Filter and sort candidates
-  const filteredCandidates = candidates
+  const filteredCandidates = currentCandidates
     .filter(candidate => {
-      const matchesSearch = candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           candidate.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           candidate.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
+      const name = candidate.name.toLowerCase();
+      const skills = candidate.skills.join(' ').toLowerCase();
+      const title = mode === 'internal' 
+        ? (candidate as ProcessedCandidate).title.toLowerCase()
+        : (candidate as ExternalCandidate).username.toLowerCase();
+      
+      const matchesSearch = name.includes(searchTerm.toLowerCase()) ||
+                           title.includes(searchTerm.toLowerCase()) ||
+                           skills.includes(searchTerm.toLowerCase());
       
       const matchesFilter = filterBy === 'all' || getScoreCategory(candidate.score) === filterBy;
       
@@ -52,7 +90,12 @@ export const ResultsPanel = ({ mode, query, candidates }: ResultsPanelProps) => 
         case 'name':
           return a.name.localeCompare(b.name);
         case 'experience':
-          return parseInt(b.experience) - parseInt(a.experience);
+          if (mode === 'internal') {
+            const aExp = parseInt((a as ProcessedCandidate).experience) || 0;
+            const bExp = parseInt((b as ProcessedCandidate).experience) || 0;
+            return bExp - aExp;
+          }
+          return (b as ExternalCandidate).accountAge - (a as ExternalCandidate).accountAge;
         default:
           return 0;
       }
@@ -70,9 +113,45 @@ export const ResultsPanel = ({ mode, query, candidates }: ResultsPanelProps) => 
                 {mode === 'internal' ? 'Candidate Results' : 'External Talent Search'}
               </h2>
             </div>
-            <Badge variant="secondary" className="px-3 py-1">
-              {filteredCandidates.length} of {candidates.length} candidates
-            </Badge>
+            <div className="flex items-center space-x-3">
+              <Badge variant="secondary" className="px-3 py-1">
+                {filteredCandidates.length} of {currentCandidates.length} candidates
+              </Badge>
+              {mode === 'internal' && comparisonCandidates.length === 2 && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setComparisonCandidates([])}
+                  className="text-blue-600"
+                >
+                  <Vs className="h-4 w-4 mr-2" />
+                  Compare Selected
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Export and Advanced Actions */}
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" onClick={handleExportPDF}>
+              <Download className="h-4 w-4 mr-2" />
+              Export PDF
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExportExcel}>
+              <Download className="h-4 w-4 mr-2" />
+              Export Excel
+            </Button>
+            {mode === 'internal' && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                disabled={comparisonCandidates.length !== 2}
+                onClick={() => {/* Will be handled by comparison panel */}}
+              >
+                <Vs className="h-4 w-4 mr-2" />
+                Compare ({comparisonCandidates.length}/2)
+              </Button>
+            )}
           </div>
 
           {/* Filters and Search */}
@@ -94,7 +173,9 @@ export const ResultsPanel = ({ mode, query, candidates }: ResultsPanelProps) => 
                 <SelectContent>
                   <SelectItem value="score">Score</SelectItem>
                   <SelectItem value="name">Name</SelectItem>
-                  <SelectItem value="experience">Experience</SelectItem>
+                  <SelectItem value="experience">
+                    {mode === 'internal' ? 'Experience' : 'Account Age'}
+                  </SelectItem>
                 </SelectContent>
               </Select>
               
@@ -113,46 +194,70 @@ export const ResultsPanel = ({ mode, query, candidates }: ResultsPanelProps) => 
             </div>
           </div>
 
-          {/* Results Table */}
+          {/* Results */}
           <div className="space-y-4">
             {filteredCandidates.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                {candidates.length === 0 
-                  ? "No candidates to display. Upload files to see results."
+                {currentCandidates.length === 0 
+                  ? mode === 'internal' 
+                    ? "No candidates to display. Upload files to see results."
+                    : "No external candidates found. Try a different search query."
                   : "No candidates match your search criteria."
                 }
               </div>
             ) : (
               filteredCandidates.map((candidate) => (
-                <Card key={candidate.id} className="p-4 hover:shadow-md transition-shadow cursor-pointer">
+                <Card key={candidate.id || (candidate as ExternalCandidate).username} className="p-4 hover:shadow-md transition-shadow">
                   <div className="flex items-start justify-between">
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-center space-x-3">
-                        <h3 className="text-lg font-medium text-gray-900">{candidate.name}</h3>
-                        <Badge variant="outline">{candidate.title}</Badge>
-                        {candidate.redFlags > 0 && (
-                          <div className="flex items-center space-x-1 text-red-500">
-                            <AlertTriangle className="h-4 w-4" />
-                            <span className="text-xs">{candidate.redFlags} red flag{candidate.redFlags > 1 ? 's' : ''}</span>
-                          </div>
-                        )}
-                      </div>
+                    <div className="flex items-start space-x-3">
+                      {mode === 'internal' && (
+                        <Checkbox
+                          checked={comparisonCandidates.some(c => c.id === (candidate as ProcessedCandidate).id)}
+                          onCheckedChange={() => handleComparisonToggle(candidate as ProcessedCandidate)}
+                          className="mt-1"
+                        />
+                      )}
                       
-                      <p className="text-sm text-gray-600">{candidate.summary}</p>
-                      
-                      <div className="flex items-center space-x-4">
-                        <span className="text-xs text-gray-500">Experience: {candidate.experience}</span>
-                        <div className="flex flex-wrap gap-1">
-                          {candidate.skills.slice(0, 4).map((skill) => (
-                            <Badge key={skill} variant="secondary" className="text-xs">
-                              {skill}
-                            </Badge>
-                          ))}
-                          {candidate.skills.length > 4 && (
-                            <Badge variant="secondary" className="text-xs">
-                              +{candidate.skills.length - 4} more
-                            </Badge>
+                      <div className="flex-1 space-y-2">
+                        <div className="flex items-center space-x-3">
+                          <h3 className="text-lg font-medium text-gray-900">{candidate.name}</h3>
+                          <Badge variant="outline">
+                            {mode === 'internal' 
+                              ? (candidate as ProcessedCandidate).title 
+                              : `@${(candidate as ExternalCandidate).username}`}
+                          </Badge>
+                          {mode === 'internal' && (candidate as ProcessedCandidate).redFlags > 0 && (
+                            <div className="flex items-center space-x-1 text-red-500">
+                              <AlertTriangle className="h-4 w-4" />
+                              <span className="text-xs">{(candidate as ProcessedCandidate).redFlags} red flag{(candidate as ProcessedCandidate).redFlags > 1 ? 's' : ''}</span>
+                            </div>
                           )}
+                        </div>
+                        
+                        <p className="text-sm text-gray-600">
+                          {mode === 'internal' 
+                            ? (candidate as ProcessedCandidate).summary 
+                            : (candidate as ExternalCandidate).bio}
+                        </p>
+                        
+                        <div className="flex items-center space-x-4">
+                          <span className="text-xs text-gray-500">
+                            {mode === 'internal' 
+                              ? `Experience: ${(candidate as ProcessedCandidate).experience}`
+                              : `${(candidate as ExternalCandidate).accountAge} years on GitHub`}
+                          </span>
+                          <div className="flex flex-wrap gap-1">
+                            {candidate.skills.slice(0, 4).map((skill) => (
+                              <Badge key={skill} variant="secondary" className="text-xs">
+                                {skill}
+                              </Badge>
+                            ))}
+                            {candidate.skills.length > 4 && (
+                              <Badge variant="secondary" className="text-xs">
+                                +{candidate.skills.length - 4} more
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -164,13 +269,31 @@ export const ResultsPanel = ({ mode, query, candidates }: ResultsPanelProps) => 
                           <span className="font-semibold">{candidate.score}</span>
                         </div>
                       </div>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => setSelectedCandidate(candidate)}
-                      >
-                        View Details
-                      </Button>
+                      <div className="flex space-x-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            if (mode === 'internal') {
+                              setSelectedCandidate(candidate as ProcessedCandidate);
+                            } else {
+                              setSelectedExternalCandidate(candidate as ExternalCandidate);
+                            }
+                          }}
+                        >
+                          View Details
+                        </Button>
+                        {mode === 'internal' && (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => setShowAIAnalysis(candidate as ProcessedCandidate)}
+                            className="text-purple-600"
+                          >
+                            <Brain className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </Card>
@@ -180,11 +303,33 @@ export const ResultsPanel = ({ mode, query, candidates }: ResultsPanelProps) => 
         </div>
       </Card>
 
-      {/* Candidate Detail Panel */}
+      {/* Detail Panels */}
       {selectedCandidate && (
         <CandidateDetailPanel
           candidate={selectedCandidate}
           onClose={() => setSelectedCandidate(null)}
+        />
+      )}
+
+      {selectedExternalCandidate && (
+        <ExternalCandidatePanel
+          candidate={selectedExternalCandidate}
+          onClose={() => setSelectedExternalCandidate(null)}
+        />
+      )}
+
+      {showAIAnalysis && (
+        <AIAnalysisPanel
+          candidate={showAIAnalysis}
+          onClose={() => setShowAIAnalysis(null)}
+        />
+      )}
+
+      {comparisonCandidates.length === 2 && (
+        <ComparisonPanel
+          candidate1={comparisonCandidates[0]}
+          candidate2={comparisonCandidates[1]}
+          onClose={() => setComparisonCandidates([])}
         />
       )}
     </>
