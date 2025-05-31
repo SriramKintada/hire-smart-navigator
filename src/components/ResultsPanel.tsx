@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Users, TrendingUp, Award, AlertTriangle, Filter, SortAsc, Brain, ArrowLeftRight, Download } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -63,6 +64,18 @@ export const ResultsPanel = ({ mode, query, candidates, externalCandidates = [] 
 
   const handleExportExcel = () => {
     exportService.exportToExcel(currentCandidates);
+  };
+
+  const handleSortChange = (value: string) => {
+    if (value === 'score' || value === 'name' || value === 'experience') {
+      setSortBy(value);
+    }
+  };
+
+  const handleFilterChange = (value: string) => {
+    if (value === 'all' || value === 'high' || value === 'medium' || value === 'low') {
+      setFilterBy(value);
+    }
   };
 
   // Filter and sort candidates
@@ -164,7 +177,7 @@ export const ResultsPanel = ({ mode, query, candidates, externalCandidates = [] 
               />
             </div>
             <div className="flex gap-2">
-              <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
+              <Select value={sortBy} onValueChange={handleSortChange}>
                 <SelectTrigger className="w-32">
                   <SortAsc className="h-4 w-4 mr-2" />
                   <SelectValue />
@@ -178,7 +191,7 @@ export const ResultsPanel = ({ mode, query, candidates, externalCandidates = [] 
                 </SelectContent>
               </Select>
               
-              <Select value={filterBy} onValueChange={(value: any) => setFilterBy(value)}>
+              <Select value={filterBy} onValueChange={handleFilterChange}>
                 <SelectTrigger className="w-32">
                   <Filter className="h-4 w-4 mr-2" />
                   <SelectValue />
@@ -187,7 +200,7 @@ export const ResultsPanel = ({ mode, query, candidates, externalCandidates = [] 
                   <SelectItem value="all">All Scores</SelectItem>
                   <SelectItem value="high">High (8.5+)</SelectItem>
                   <SelectItem value="medium">Medium (7-8.4)</SelectItem>
-                  <SelectItem value="low">Low (&lt; 7)</SelectItem>
+                  <SelectItem value="low">Low (under 7)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
