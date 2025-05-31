@@ -187,7 +187,7 @@ export const ResultsPanel = ({ mode, query, candidates, externalCandidates = [] 
                   <SelectItem value="all">All Scores</SelectItem>
                   <SelectItem value="high">High (8.5+)</SelectItem>
                   <SelectItem value="medium">Medium (7-8.4)</SelectItem>
-                  <SelectItem value="low">Low (<7)</SelectItem>
+                  <SelectItem value="low">Low (&lt; 7)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
