@@ -2,12 +2,22 @@
 import { BarChart, PieChart, TrendingUp, Users, Award, AlertTriangle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { AppMode } from '@/pages/Index';
+import { ProcessedCandidate } from '@/hooks/useFileProcessing';
 
 interface AnalyticsDashboardProps {
   mode: AppMode;
+  candidates: ProcessedCandidate[];
 }
 
-export const AnalyticsDashboard = ({ mode }: AnalyticsDashboardProps) => {
+export const AnalyticsDashboard = ({ mode, candidates }: AnalyticsDashboardProps) => {
+  // Calculate real stats from candidates data
+  const totalCandidates = candidates.length;
+  const avgScore = candidates.length > 0 
+    ? (candidates.reduce((sum, c) => sum + c.score, 0) / candidates.length).toFixed(1)
+    : '0';
+  const topTierCount = candidates.filter(c => c.score >= 8).length;
+  const redFlagsCount = candidates.reduce((sum, c) => sum + c.redFlags, 0);
+
   return (
     <div className="space-y-6">
       {/* Quick Stats */}
@@ -17,7 +27,7 @@ export const AnalyticsDashboard = ({ mode }: AnalyticsDashboardProps) => {
             <Users className="h-5 w-5 text-blue-600" />
             <div>
               <p className="text-xs text-gray-500">Total Candidates</p>
-              <p className="text-lg font-semibold">47</p>
+              <p className="text-lg font-semibold">{totalCandidates}</p>
             </div>
           </div>
         </Card>
@@ -27,7 +37,7 @@ export const AnalyticsDashboard = ({ mode }: AnalyticsDashboardProps) => {
             <Award className="h-5 w-5 text-green-600" />
             <div>
               <p className="text-xs text-gray-500">Avg Score</p>
-              <p className="text-lg font-semibold">7.8</p>
+              <p className="text-lg font-semibold">{avgScore}</p>
             </div>
           </div>
         </Card>
@@ -37,7 +47,7 @@ export const AnalyticsDashboard = ({ mode }: AnalyticsDashboardProps) => {
             <TrendingUp className="h-5 w-5 text-purple-600" />
             <div>
               <p className="text-xs text-gray-500">Top Tier</p>
-              <p className="text-lg font-semibold">12</p>
+              <p className="text-lg font-semibold">{topTierCount}</p>
             </div>
           </div>
         </Card>
@@ -47,7 +57,7 @@ export const AnalyticsDashboard = ({ mode }: AnalyticsDashboardProps) => {
             <AlertTriangle className="h-5 w-5 text-red-600" />
             <div>
               <p className="text-xs text-gray-500">Red Flags</p>
-              <p className="text-lg font-semibold">3</p>
+              <p className="text-lg font-semibold">{redFlagsCount}</p>
             </div>
           </div>
         </Card>
