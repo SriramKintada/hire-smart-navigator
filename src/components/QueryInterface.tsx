@@ -30,14 +30,18 @@ const EXTERNAL_EXAMPLES = [
 
 export const QueryInterface = ({ mode, query, onQueryChange, onSearch }: QueryInterfaceProps) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [language, setLanguage] = useState<string>('');
+  const [language, setLanguage] = useState<string>('all');
   const [location, setLocation] = useState<string>('');
   
   const examples = mode === 'internal' ? INTERNAL_EXAMPLES : EXTERNAL_EXAMPLES;
 
   const handleSearch = () => {
     if (onSearch && query.trim()) {
-      onSearch(query, { language, location });
+      const filters = {
+        language: language === 'all' ? undefined : language,
+        location: location.trim() || undefined
+      };
+      onSearch(query, filters);
     }
   };
 
@@ -90,7 +94,7 @@ export const QueryInterface = ({ mode, query, onQueryChange, onSearch }: QueryIn
                   <SelectValue placeholder="Programming Language" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Languages</SelectItem>
+                  <SelectItem value="all">All Languages</SelectItem>
                   <SelectItem value="javascript">JavaScript</SelectItem>
                   <SelectItem value="typescript">TypeScript</SelectItem>
                   <SelectItem value="python">Python</SelectItem>
