@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { X, Vs, TrendingUp, Users, Award } from 'lucide-react';
+import { X, ArrowLeftRight, TrendingUp, Users, Award } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -42,7 +42,7 @@ export const ComparisonPanel = ({ candidate1, candidate2, onClose }: ComparisonP
       <Card className="w-full max-w-5xl max-h-[90vh] overflow-hidden">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <div className="flex items-center space-x-3">
-            <Vs className="h-6 w-6 text-blue-600" />
+            <ArrowLeftRight className="h-6 w-6 text-blue-600" />
             <div>
               <CardTitle className="text-xl">Candidate Comparison</CardTitle>
               <p className="text-gray-600">Head-to-head analysis</p>
@@ -91,7 +91,7 @@ export const ComparisonPanel = ({ candidate1, candidate2, onClose }: ComparisonP
 
           {!comparison ? (
             <div className="text-center py-12">
-              <Vs className="h-16 w-16 text-blue-600 mx-auto mb-4" />
+              <ArrowLeftRight className="h-16 w-16 text-blue-600 mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">AI-Powered Comparison</h3>
               <p className="text-gray-600 mb-6">
                 Get detailed insights on how these candidates compare across key metrics.

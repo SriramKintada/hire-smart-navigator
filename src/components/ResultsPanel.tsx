@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import { Users, TrendingUp, Award, AlertTriangle, Filter, SortAsc, Brain, Vs, Download } from 'lucide-react';
+import { Users, TrendingUp, Award, AlertTriangle, Filter, SortAsc, Brain, ArrowLeftRight, Download } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -124,7 +123,7 @@ export const ResultsPanel = ({ mode, query, candidates, externalCandidates = [] 
                   onClick={() => setComparisonCandidates([])}
                   className="text-blue-600"
                 >
-                  <Vs className="h-4 w-4 mr-2" />
+                  <ArrowLeftRight className="h-4 w-4 mr-2" />
                   Compare Selected
                 </Button>
               )}
@@ -148,7 +147,7 @@ export const ResultsPanel = ({ mode, query, candidates, externalCandidates = [] 
                 disabled={comparisonCandidates.length !== 2}
                 onClick={() => {/* Will be handled by comparison panel */}}
               >
-                <Vs className="h-4 w-4 mr-2" />
+                <ArrowLeftRight className="h-4 w-4 mr-2" />
                 Compare ({comparisonCandidates.length}/2)
               </Button>
             )}
