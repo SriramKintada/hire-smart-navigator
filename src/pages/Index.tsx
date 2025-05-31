@@ -6,6 +6,7 @@ import { QueryInterface } from '@/components/QueryInterface';
 import { FileUpload } from '@/components/FileUpload';
 import { ResultsPanel } from '@/components/ResultsPanel';
 import { AnalyticsDashboard } from '@/components/AnalyticsDashboard';
+import { useFileProcessing } from '@/hooks/useFileProcessing';
 
 export type AppMode = 'internal' | 'external';
 
@@ -13,6 +14,16 @@ const Index = () => {
   const [mode, setMode] = useState<AppMode>('internal');
   const [query, setQuery] = useState('');
   const [hasData, setHasData] = useState(false);
+  
+  const { processFiles, candidates, isProcessing, error } = useFileProcessing();
+
+  const handleFilesSelected = async (excelFile?: File, resumeFiles?: File[]) => {
+    await processFiles(excelFile, resumeFiles);
+  };
+
+  const handleDataUploaded = () => {
+    setHasData(true);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
@@ -33,17 +44,29 @@ const Index = () => {
 
         {/* File Upload (Internal Mode Only) */}
         {mode === 'internal' && (
-          <FileUpload onDataUploaded={() => setHasData(true)} />
+          <FileUpload 
+            onDataUploaded={handleDataUploaded}
+            onFilesSelected={handleFilesSelected}
+            isProcessing={isProcessing}
+            error={error}
+          />
         )}
 
         {/* Results and Analytics */}
-        {(hasData || mode === 'external') && (
+        {((hasData && candidates.length > 0) || mode === 'external') && (
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
             <div className="xl:col-span-2">
-              <ResultsPanel mode={mode} query={query} />
+              <ResultsPanel 
+                mode={mode} 
+                query={query} 
+                candidates={mode === 'internal' ? candidates : []}
+              />
             </div>
             <div>
-              <AnalyticsDashboard mode={mode} />
+              <AnalyticsDashboard 
+                mode={mode} 
+                candidates={mode === 'internal' ? candidates : []}
+              />
             </div>
           </div>
         )}
