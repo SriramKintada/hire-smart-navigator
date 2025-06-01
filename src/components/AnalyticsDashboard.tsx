@@ -1,20 +1,38 @@
-import { BarChart, PieChart, TrendingUp, Users, Award, AlertTriangle, Brain } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { AppMode } from '@/pages/Index';
-import { ProcessedCandidate } from '@/hooks/useFileProcessing';
-import CountUp from 'react-countup';
-import type { CountUpProps } from 'react-countup';
+import {
+  BarChart,
+  PieChart,
+  TrendingUp,
+  Users,
+  Award,
+  AlertTriangle,
+  Brain,
+} from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { AppMode } from "@/pages/Index";
+import { ProcessedCandidate } from "@/hooks/useFileProcessing";
+import CountUp from "react-countup";
+import type { CountUpProps } from "react-countup";
 
 interface AnalyticsDashboardProps {
   mode: AppMode;
   candidates: ProcessedCandidate[];
 }
 
-export const AnalyticsDashboard = ({ mode, candidates }: AnalyticsDashboardProps) => {
+export const AnalyticsDashboard = ({
+  mode,
+  candidates,
+}: AnalyticsDashboardProps) => {
   // Calculate metrics
   const totalCandidates = candidates.length;
-  const avgScore = totalCandidates > 0 ? (candidates.reduce((sum, c) => sum + c.score, 0) / totalCandidates) : 0;
-  const redFlagsCount = candidates.reduce((sum, c) => sum + (c.redFlags || 0), 0);
+  const avgScore =
+    totalCandidates > 0
+      ? candidates.reduce((sum, c) => sum + c.score, 0) / totalCandidates
+      : 0;
+  const redFlagsCount = candidates.reduce(
+    (sum, c) =>
+      sum + (Array.isArray(c.redFlags) ? c.redFlags.length : c.redFlags || 0),
+    0
+  );
 
   return (
     <div className="space-y-6">
@@ -34,7 +52,11 @@ export const AnalyticsDashboard = ({ mode, candidates }: AnalyticsDashboardProps
           <Brain className="h-8 w-8 text-green-500" />
           <div>
             <div className="text-2xl font-bold text-gray-800">
-              <CountUp end={Number(avgScore.toFixed(1))} duration={1.2} decimals={1} />
+              <CountUp
+                end={Number(avgScore.toFixed(1))}
+                duration={1.2}
+                decimals={1}
+              />
             </div>
             <div className="text-sm text-gray-500">Avg Resume Score</div>
           </div>
@@ -72,7 +94,7 @@ export const AnalyticsDashboard = ({ mode, candidates }: AnalyticsDashboardProps
         </div>
       </Card>
 
-      {mode === 'internal' && (
+      {mode === "internal" && (
         <Card className="p-4">
           <div className="flex items-center space-x-2 mb-4">
             <TrendingUp className="h-5 w-5 text-purple-600" />
@@ -84,7 +106,7 @@ export const AnalyticsDashboard = ({ mode, candidates }: AnalyticsDashboardProps
         </Card>
       )}
 
-      {mode === 'external' && (
+      {mode === "external" && (
         <Card className="p-4">
           <div className="flex items-center space-x-2 mb-4">
             <BarChart className="h-5 w-5 text-orange-600" />

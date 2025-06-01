@@ -1,7 +1,13 @@
-import { useState } from 'react';
-import { Upload, FileText, FileSpreadsheet, CheckCircle, AlertCircle } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import {
+  Upload,
+  FileText,
+  FileSpreadsheet,
+  CheckCircle,
+  AlertCircle,
+} from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 interface FileUploadProps {
   onDataUploaded: () => void;
@@ -10,7 +16,12 @@ interface FileUploadProps {
   error?: string | null;
 }
 
-export const FileUpload = ({ onDataUploaded, onFilesSelected, isProcessing, error }: FileUploadProps) => {
+export const FileUpload = ({
+  onDataUploaded,
+  onFilesSelected,
+  isProcessing,
+  error,
+}: FileUploadProps) => {
   const [excelFile, setExcelFile] = useState<File | null>(null);
   const [resumeFiles, setResumeFiles] = useState<File[]>([]);
 
@@ -23,18 +34,21 @@ export const FileUpload = ({ onDataUploaded, onFilesSelected, isProcessing, erro
 
   const handleResumeUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
-    setResumeFiles(prev => [...prev, ...files]);
+    setResumeFiles((prev) => [...prev, ...files]);
   };
 
   const handleProcess = async () => {
     if (!excelFile && resumeFiles.length === 0) return;
-    
-    onFilesSelected(excelFile || undefined, resumeFiles.length > 0 ? resumeFiles : undefined);
+
+    onFilesSelected(
+      excelFile || undefined,
+      resumeFiles.length > 0 ? resumeFiles : undefined
+    );
     onDataUploaded();
   };
 
   const removeResumeFile = (index: number) => {
-    setResumeFiles(prev => prev.filter((_, i) => i !== index));
+    setResumeFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -47,8 +61,12 @@ export const FileUpload = ({ onDataUploaded, onFilesSelected, isProcessing, erro
               <FileSpreadsheet className="h-6 w-6 text-green-400" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-white">Candidate Data</h3>
-              <p className="text-sm text-gray-300">Upload Excel file with applicant information</p>
+              <h3 className="text-lg font-semibold text-white">
+                Candidate Data
+              </h3>
+              <p className="text-sm text-gray-300">
+                Upload Excel file with applicant information
+              </p>
             </div>
             <div className="space-y-3">
               <input
@@ -59,7 +77,11 @@ export const FileUpload = ({ onDataUploaded, onFilesSelected, isProcessing, erro
                 id="excel-upload"
               />
               <label htmlFor="excel-upload">
-                <Button variant="outline" className="w-full bg-[#181926] border-[#2a2b3d] text-white hover:bg-blue-900/30" asChild>
+                <Button
+                  variant="outline"
+                  className="w-full bg-[#181926] border-[#2a2b3d] text-white hover:bg-blue-900/30"
+                  asChild
+                >
                   <span className="cursor-pointer">
                     <Upload className="h-4 w-4 mr-2 text-blue-400" />
                     Choose Excel File
@@ -83,19 +105,25 @@ export const FileUpload = ({ onDataUploaded, onFilesSelected, isProcessing, erro
             </div>
             <div>
               <h3 className="text-lg font-semibold text-white">Resume Files</h3>
-              <p className="text-sm text-gray-300">Upload PDF/DOCX resume files</p>
+              <p className="text-sm text-gray-300">
+                Upload PDF/DOCX resume files
+              </p>
             </div>
             <div className="space-y-3">
               <input
                 type="file"
-                accept=".pdf,.docx,.doc"
+                accept=".pdf,.docx,.doc,.jpg,.jpeg,.png"
                 multiple
                 onChange={handleResumeUpload}
                 className="hidden"
                 id="resume-upload"
               />
               <label htmlFor="resume-upload">
-                <Button variant="outline" className="w-full bg-[#181926] border-[#2a2b3d] text-white hover:bg-blue-900/30" asChild>
+                <Button
+                  variant="outline"
+                  className="w-full bg-[#181926] border-[#2a2b3d] text-white hover:bg-blue-900/30"
+                  asChild
+                >
                   <span className="cursor-pointer">
                     <Upload className="h-4 w-4 mr-2 text-blue-400" />
                     Choose Resume Files
@@ -110,7 +138,10 @@ export const FileUpload = ({ onDataUploaded, onFilesSelected, isProcessing, erro
                   </div>
                   <div className="max-h-20 overflow-y-auto space-y-1">
                     {resumeFiles.map((file, index) => (
-                      <div key={index} className="flex items-center justify-between text-xs bg-[#181926] px-2 py-1 rounded text-white">
+                      <div
+                        key={index}
+                        className="flex items-center justify-between text-xs bg-[#181926] px-2 py-1 rounded text-white"
+                      >
                         <span className="truncate">{file.name}</span>
                         <button
                           onClick={() => removeResumeFile(index)}
