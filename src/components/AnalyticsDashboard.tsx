@@ -1,8 +1,9 @@
-
-import { BarChart, PieChart, TrendingUp, Users, Award, AlertTriangle } from 'lucide-react';
+import { BarChart, PieChart, TrendingUp, Users, Award, AlertTriangle, Brain } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { AppMode } from '@/pages/Index';
 import { ProcessedCandidate } from '@/hooks/useFileProcessing';
+import CountUp from 'react-countup';
+import type { CountUpProps } from 'react-countup';
 
 interface AnalyticsDashboardProps {
   mode: AppMode;
@@ -10,57 +11,44 @@ interface AnalyticsDashboardProps {
 }
 
 export const AnalyticsDashboard = ({ mode, candidates }: AnalyticsDashboardProps) => {
-  // Calculate real stats from candidates data
+  // Calculate metrics
   const totalCandidates = candidates.length;
-  const avgScore = candidates.length > 0 
-    ? (candidates.reduce((sum, c) => sum + c.score, 0) / candidates.length).toFixed(1)
-    : '0';
-  const topTierCount = candidates.filter(c => c.score >= 8).length;
-  const redFlagsCount = candidates.reduce((sum, c) => sum + c.redFlags, 0);
+  const avgScore = totalCandidates > 0 ? (candidates.reduce((sum, c) => sum + c.score, 0) / totalCandidates) : 0;
+  const redFlagsCount = candidates.reduce((sum, c) => sum + (c.redFlags || 0), 0);
 
   return (
     <div className="space-y-6">
-      {/* Quick Stats */}
-      <div className="grid grid-cols-2 gap-4">
-        <Card className="p-4">
-          <div className="flex items-center space-x-2">
-            <Users className="h-5 w-5 text-blue-600" />
-            <div>
-              <p className="text-xs text-gray-500">Total Candidates</p>
-              <p className="text-lg font-semibold">{totalCandidates}</p>
+      <div className="grid grid-cols-1 gap-4">
+        {/* Total Candidates */}
+        <div className="bg-white rounded-md shadow p-5 flex items-center space-x-4 border border-gray-100">
+          <Users className="h-8 w-8 text-blue-500" />
+          <div>
+            <div className="text-2xl font-bold text-gray-800">
+              <CountUp end={totalCandidates} duration={1.2} />
             </div>
+            <div className="text-sm text-gray-500">Total Candidates</div>
           </div>
-        </Card>
-        
-        <Card className="p-4">
-          <div className="flex items-center space-x-2">
-            <Award className="h-5 w-5 text-green-600" />
-            <div>
-              <p className="text-xs text-gray-500">Avg Score</p>
-              <p className="text-lg font-semibold">{avgScore}</p>
+        </div>
+        {/* Average Score */}
+        <div className="bg-white rounded-md shadow p-5 flex items-center space-x-4 border border-gray-100">
+          <Brain className="h-8 w-8 text-green-500" />
+          <div>
+            <div className="text-2xl font-bold text-gray-800">
+              <CountUp end={Number(avgScore.toFixed(1))} duration={1.2} decimals={1} />
             </div>
+            <div className="text-sm text-gray-500">Avg Resume Score</div>
           </div>
-        </Card>
-        
-        <Card className="p-4">
-          <div className="flex items-center space-x-2">
-            <TrendingUp className="h-5 w-5 text-purple-600" />
-            <div>
-              <p className="text-xs text-gray-500">Top Tier</p>
-              <p className="text-lg font-semibold">{topTierCount}</p>
+        </div>
+        {/* Total Red Flags */}
+        <div className="bg-white rounded-md shadow p-5 flex items-center space-x-4 border border-gray-100">
+          <AlertTriangle className="h-8 w-8 text-red-500" />
+          <div>
+            <div className="text-2xl font-bold text-gray-800">
+              <CountUp end={redFlagsCount} duration={1.2} />
             </div>
+            <div className="text-sm text-gray-500">Total Red Flags</div>
           </div>
-        </Card>
-        
-        <Card className="p-4">
-          <div className="flex items-center space-x-2">
-            <AlertTriangle className="h-5 w-5 text-red-600" />
-            <div>
-              <p className="text-xs text-gray-500">Red Flags</p>
-              <p className="text-lg font-semibold">{redFlagsCount}</p>
-            </div>
-          </div>
-        </Card>
+        </div>
       </div>
 
       {/* Chart Placeholders */}

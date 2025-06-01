@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import { Users, TrendingUp, Award, AlertTriangle, Filter, SortAsc, Brain, ArrowLeftRight, Download } from 'lucide-react';
+import { Users, TrendingUp, Award, AlertTriangle, Filter, SortAsc, Brain, ArrowLeftRight, Download, Info, ArrowUpRight, ArrowDownRight, X } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,6 +14,8 @@ import { ComparisonPanel } from './ComparisonPanel';
 import { ProcessedCandidate } from '@/hooks/useFileProcessing';
 import { ExternalCandidate } from '@/services/githubApi';
 import { exportService } from '@/services/exportService';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import ExpandableCardDemo from './ui/expandable-card-demo-standard';
 
 interface ResultsPanelProps {
   mode: AppMode;
@@ -31,6 +32,9 @@ export const ResultsPanel = ({ mode, query, candidates, externalCandidates = [] 
   const [sortBy, setSortBy] = useState<'score' | 'name' | 'experience'>('score');
   const [filterBy, setFilterBy] = useState<'all' | 'high' | 'medium' | 'low'>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeFilters, setActiveFilters] = useState<{ label: string; value: string }[]>([]);
+  const [showCardModal, setShowCardModal] = useState(false);
+  const [cardData, setCardData] = useState<any[]>([]);
 
   const currentCandidates = mode === 'internal' ? candidates : externalCandidates;
 
@@ -113,10 +117,128 @@ export const ResultsPanel = ({ mode, query, candidates, externalCandidates = [] 
       }
     });
 
+  const renderRedFlags = (candidate: ProcessedCandidate) => {
+    if (!candidate.redFlags || candidate.redFlags === 0) return null;
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="ml-2 align-middle cursor-pointer text-red-500">
+            <Info className="inline h-4 w-4" />
+          </span>
+        </TooltipTrigger>
+        <TooltipContent className="max-w-xs">
+          <div className="font-semibold mb-1 text-red-600">{candidate.redFlags} Red Flag{candidate.redFlags > 1 ? 's' : ''}:</div>
+          <ul className="list-disc ml-4 text-xs text-gray-700 space-y-1">
+            <li>Overlapping dates</li>
+            <li>Grammar issues</li>
+            <li>Unverifiable links</li>
+            {/* Add more as needed */}
+          </ul>
+        </TooltipContent>
+      </Tooltip>
+    );
+  };
+
+  // Handler to add a filter tag
+  const addFilter = (label: string, value: string) => {
+    if (!activeFilters.some(f => f.label === label && f.value === value)) {
+      setActiveFilters([...activeFilters, { label, value }]);
+    }
+  };
+  // Handler to remove a filter tag
+  const removeFilter = (idx: number) => {
+    setActiveFilters(activeFilters.filter((_, i) => i !== idx));
+  };
+
+  // Handler to open modal for a candidate
+  const handleCandidateClick = (candidate: any) => {
+    setCardData([mapCandidateToCard(candidate)]);
+    setShowCardModal(true);
+  };
+
+  // Handler to open modal for all talent search cards
+  const handleTalentSearchModal = () => {
+    setCardData(mockTalentCards);
+    setShowCardModal(true);
+  };
+
+  // Map internal candidate to card format
+  const mapCandidateToCard = (candidate: any) => ({
+    title: candidate.name,
+    description: candidate.title || candidate.bio || '',
+    src: candidate.avatar || 'https://randomuser.me/api/portraits/men/32.jpg',
+    ctaText: 'View Profile',
+    ctaLink: '#',
+    content: () => (
+      <div>
+        <p><b>Summary:</b> {candidate.summary || candidate.bio}</p>
+        <p><b>Skills:</b> {candidate.skills?.join(', ')}</p>
+        <p><b>Experience:</b> {candidate.experience || candidate.accountAge + ' years'}</p>
+        <p><b>Score:</b> {candidate.score}</p>
+        <p><b>Red Flags:</b> {candidate.redFlags || 0}</p>
+      </div>
+    )
+  });
+
+  // Mock data for Talent Search
+  const mockTalentCards = [
+    {
+      title: 'React Developer',
+      description: 'Expert in React, TypeScript, and Tailwind.',
+      src: 'https://randomuser.me/api/portraits/men/32.jpg',
+      ctaText: 'View Profile',
+      ctaLink: '#',
+      content: () => <p>Skilled in building scalable UIs, 5+ years experience, open to remote work.</p>
+    },
+    {
+      title: 'Python Engineer',
+      description: 'Backend specialist, Django & FastAPI.',
+      src: 'https://randomuser.me/api/portraits/women/44.jpg',
+      ctaText: 'View Profile',
+      ctaLink: '#',
+      content: () => <p>Expert in API design, cloud deployments, and data pipelines.</p>
+    },
+    {
+      title: 'DevOps Lead',
+      description: 'AWS, Docker, Kubernetes, CI/CD.',
+      src: 'https://randomuser.me/api/portraits/men/65.jpg',
+      ctaText: 'View Profile',
+      ctaLink: '#',
+      content: () => <p>10+ years in infrastructure automation and team leadership.</p>
+    }
+  ];
+
   return (
     <>
       <Card className="p-6">
         <div className="space-y-6">
+          {/* External Search Tag Filter Bar */}
+          {mode === 'external' && (
+            <div className="mb-4">
+              <div className="flex flex-wrap gap-2 mb-2">
+                {activeFilters.map((filter, idx) => (
+                  <span key={idx} className="bg-teal-100 text-teal-700 px-3 py-1 rounded-full flex items-center text-xs font-medium">
+                    {filter.label}: {filter.value}
+                    <button className="ml-2" onClick={() => removeFilter(idx)}>
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Search GitHub talent..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full shadow-sm rounded-lg border-gray-200"
+                />
+                {/* Example filter buttons (could be dropdowns in future) */}
+                <Button size="sm" variant="outline" onClick={() => addFilter('Language', 'Python')}>Python</Button>
+                <Button size="sm" variant="outline" onClick={() => addFilter('Location', 'Berlin')}>Berlin</Button>
+              </div>
+            </div>
+          )}
+
           {/* Header */}
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -219,7 +341,7 @@ export const ResultsPanel = ({ mode, query, candidates, externalCandidates = [] 
               </div>
             ) : (
               filteredCandidates.map((candidate) => (
-                <Card key={candidate.id || (candidate as ExternalCandidate).username} className="p-4 hover:shadow-md transition-shadow">
+                <Card key={candidate.id || (candidate as ExternalCandidate).username} className="p-4 hover:shadow-md transition-shadow" onClick={() => handleCandidateClick(candidate)}>
                   <div className="flex items-start justify-between">
                     <div className="flex items-start space-x-3">
                       {mode === 'internal' && (
@@ -232,7 +354,7 @@ export const ResultsPanel = ({ mode, query, candidates, externalCandidates = [] 
                       
                       <div className="flex-1 space-y-2">
                         <div className="flex items-center space-x-3">
-                          <h3 className="text-lg font-medium text-gray-900">{candidate.name}</h3>
+                          <h3 className="text-lg font-medium text-gray-900">{candidate.name} {renderRedFlags(candidate as ProcessedCandidate)}</h3>
                           <Badge variant="outline">
                             {mode === 'internal' 
                               ? (candidate as ProcessedCandidate).title 
@@ -275,17 +397,30 @@ export const ResultsPanel = ({ mode, query, candidates, externalCandidates = [] 
                     </div>
                     
                     <div className="flex flex-col items-end space-y-2">
-                      <div className={`px-3 py-2 rounded-lg ${getScoreColor(candidate.score)}`}>
-                        <div className="flex items-center space-x-1">
-                          <TrendingUp className="h-4 w-4" />
-                          <span className="font-semibold">{candidate.score}</span>
-                        </div>
+                      <div className={`px-3 py-2 rounded-lg ${getScoreColor(candidate.score)} flex items-center space-x-1 group relative`}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="flex items-center cursor-pointer">
+                              <TrendingUp className="h-4 w-4" />
+                              <span className="font-semibold text-lg">{candidate.score}</span>
+                              {candidate.score >= 8 ? (
+                                <ArrowUpRight className="h-4 w-4 text-green-500 animate-bounce" />
+                              ) : (
+                                <ArrowDownRight className="h-4 w-4 text-red-400 animate-bounce" />
+                              )}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <span>Overall Resume Score</span>
+                          </TooltipContent>
+                        </Tooltip>
                       </div>
                       <div className="flex space-x-2">
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             if (mode === 'internal') {
                               setSelectedCandidate(candidate as ProcessedCandidate);
                             } else {
@@ -299,7 +434,10 @@ export const ResultsPanel = ({ mode, query, candidates, externalCandidates = [] 
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => setShowAIAnalysis(candidate as ProcessedCandidate)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowAIAnalysis(candidate as ProcessedCandidate);
+                            }}
                             className="text-purple-600"
                           >
                             <Brain className="h-4 w-4" />
@@ -344,6 +482,8 @@ export const ResultsPanel = ({ mode, query, candidates, externalCandidates = [] 
           onClose={() => setComparisonCandidates([])}
         />
       )}
+
+      {showCardModal && <ExpandableCardDemo cards={cardData} />}
     </>
   );
 };

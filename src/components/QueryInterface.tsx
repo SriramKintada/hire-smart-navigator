@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Search, Lightbulb, Filter } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -52,95 +51,29 @@ export const QueryInterface = ({ mode, query, onQueryChange, onSearch }: QueryIn
   };
 
   return (
-    <Card className="p-6 bg-white/80 backdrop-blur-sm">
-      <div className="space-y-4">
-        <div className="flex items-center space-x-2 text-gray-700">
-          <Search className="h-5 w-5" />
-          <h2 className="text-lg font-semibold">
-            {mode === 'internal' ? 'Query Your Candidate Pool' : 'Search External Talent'}
-          </h2>
-        </div>
-        
-        <div className="relative">
-          <Input
-            placeholder={
-              mode === 'internal'
-                ? "Ask anything about your candidates..."
-                : "Search for talent across GitHub..."
-            }
-            value={query}
-            onChange={(e) => onQueryChange(e.target.value)}
-            onFocus={() => setShowSuggestions(true)}
-            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-            onKeyPress={handleKeyPress}
-            className="text-lg py-3 pr-12"
-          />
-          <Button
-            size="sm"
-            className="absolute right-2 top-1/2 transform -translate-y-1/2"
-            onClick={handleSearch}
-          >
-            <Search className="h-4 w-4" />
-          </Button>
-        </div>
-
-        {/* External Mode Filters */}
-        {mode === 'external' && (
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <Select value={language} onValueChange={setLanguage}>
-                <SelectTrigger>
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Programming Language" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Languages</SelectItem>
-                  <SelectItem value="javascript">JavaScript</SelectItem>
-                  <SelectItem value="typescript">TypeScript</SelectItem>
-                  <SelectItem value="python">Python</SelectItem>
-                  <SelectItem value="java">Java</SelectItem>
-                  <SelectItem value="go">Go</SelectItem>
-                  <SelectItem value="rust">Rust</SelectItem>
-                  <SelectItem value="cpp">C++</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex-1">
-              <Input
-                placeholder="Location (optional)"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-              />
-            </div>
-          </div>
-        )}
-
-        {showSuggestions && (
-          <Card className="absolute z-10 w-full mt-1 p-3 bg-white border shadow-lg">
-            <div className="flex items-center space-x-2 mb-2">
-              <Lightbulb className="h-4 w-4 text-yellow-500" />
-              <span className="text-sm font-medium text-gray-700">Example queries:</span>
-            </div>
-            <div className="space-y-1">
-              {examples.map((example, index) => (
-                <button
-                  key={index}
-                  onClick={() => onQueryChange(example)}
-                  className="block w-full text-left text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 p-2 rounded transition-colors"
-                >
-                  {example}
-                </button>
-              ))}
-            </div>
-          </Card>
-        )}
-        
-        <p className="text-sm text-gray-600">
-          {mode === 'internal'
-            ? "Upload your candidate data below, then use natural language to filter, rank, and analyze your applicant pool."
-            : "Search across GitHub to find external talent. Use filters to narrow down by programming language and location."}
-        </p>
+    <div className="rounded-xl bg-[#222336] border border-[#2a2b3d] shadow-md p-6 mb-6">
+      <div className="mb-2 flex items-center gap-2">
+        <Search className="h-5 w-5 text-blue-400" />
+        <span className="font-semibold text-lg text-white">Query Your Candidate Pool</span>
       </div>
-    </Card>
+      <div className="flex items-center gap-2">
+        <input
+          type="text"
+          className="flex-1 rounded-lg px-4 py-3 bg-[#181926] text-white border border-[#2a2b3d] focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30 outline-none placeholder-gray-400 text-base shadow-sm transition"
+          placeholder="Ask anything about your candidates..."
+          value={query}
+          onChange={e => onQueryChange(e.target.value)}
+        />
+        <button
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg font-bold shadow transition"
+          onClick={() => onSearch && onSearch(query)}
+        >
+          <Search className="h-5 w-5" />
+        </button>
+      </div>
+      <p className="mt-2 text-gray-400 text-sm">
+        Upload your candidate data below, then use natural language to filter, rank, and analyze your applicant pool.
+      </p>
+    </div>
   );
 };

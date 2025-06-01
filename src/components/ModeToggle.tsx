@@ -1,6 +1,4 @@
-
-import { FileText, Globe } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import ThreePositionToggle from './ui/ThreePositionToggle';
 import { AppMode } from '@/pages/Index';
 
 interface ModeToggleProps {
@@ -8,34 +6,20 @@ interface ModeToggleProps {
   onModeChange: (mode: AppMode) => void;
 }
 
+const modeMap: AppMode[] = ['internal', 'external', 'resume'];
+const labelMap = ['Recruiter View', 'Talent Search', 'Resume Checker'];
+
 export const ModeToggle = ({ mode, onModeChange }: ModeToggleProps) => {
+  // Find the selected index based on mode
+  const selectedIdx = modeMap.indexOf(mode);
   return (
-    <Card className="p-2 bg-white/60 backdrop-blur-sm border-2">
-      <div className="flex rounded-lg overflow-hidden">
-        <button
-          onClick={() => onModeChange('internal')}
-          className={`flex items-center space-x-2 px-6 py-3 font-medium transition-all duration-200 ${
-            mode === 'internal'
-              ? 'bg-blue-600 text-white shadow-lg'
-              : 'bg-transparent text-gray-600 hover:bg-blue-50'
-          }`}
-        >
-          <FileText className="h-5 w-5" />
-          <span>Internal Mode</span>
-        </button>
-        
-        <button
-          onClick={() => onModeChange('external')}
-          className={`flex items-center space-x-2 px-6 py-3 font-medium transition-all duration-200 ${
-            mode === 'external'
-              ? 'bg-blue-600 text-white shadow-lg'
-              : 'bg-transparent text-gray-600 hover:bg-blue-50'
-          }`}
-        >
-          <Globe className="h-5 w-5" />
-          <span>External Mode</span>
-        </button>
-      </div>
-    </Card>
+    <ThreePositionToggle
+      onChange={label => {
+        const idx = labelMap.indexOf(label);
+        if (idx !== -1) onModeChange(modeMap[idx]);
+      }}
+      initial={selectedIdx}
+      labels={labelMap}
+    />
   );
 };
