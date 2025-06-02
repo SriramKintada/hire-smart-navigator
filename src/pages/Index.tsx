@@ -5,9 +5,11 @@ import { QueryInterface } from "@/components/QueryInterface";
 import { FileUpload } from "@/components/FileUpload";
 import { ResultsPanel } from "@/components/ResultsPanel";
 import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
+import { TalentAnalyticsDashboard } from "@/components/analytics/TalentAnalyticsDashboard";
 import { useFileProcessing } from "@/hooks/useFileProcessing";
 import { useExternalSearch } from "@/hooks/useExternalSearch";
 import { ScoreBreakdown } from "@/components/charts/ScoreBreakdown";
+import { analytics } from '@/lib/analytics';
 
 export type AppMode = "internal" | "external" | "resume" | "analytics";
 
