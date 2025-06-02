@@ -51,12 +51,12 @@ REQUIREMENTS:
 
 Return ONLY a valid JSON array with this exact format:
 [
-  {
-    "question": "Can you walk me through your experience with [specific technology from their skills]?",
+  {{
+    "question": "Example question?",
     "category": "Technical",
     "difficulty": "Medium",
     "focus_area": "Technology Experience"
-  }
+  }}
 ]
 
 Make questions specific to their background, not generic. Use their actual skills and experience in the questions."""
