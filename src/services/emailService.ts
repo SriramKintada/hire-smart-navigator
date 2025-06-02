@@ -150,6 +150,14 @@ class EmailService {
   ): void {
     const email = this.generatePersonalizedEmail(candidate, mode, senderName, companyName);
     this.openMailClient(email);
+    
+    // Track the candidate contact event in PostHog
+    analytics.trackCandidateContacted({
+      name: candidate.name,
+      score: candidate.score,
+      skills: candidate.skills,
+      contactMethod: 'email'
+    });
   }
 }
 
