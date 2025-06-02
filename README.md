@@ -71,3 +71,84 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+# Hire Smart Navigator
+
+A smart hiring platform that helps match candidates with job descriptions using AI.
+
+## Setup Instructions
+
+### Backend Setup
+
+1. Create a Python virtual environment:
+
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+2. Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+3. Start the Flask server:
+
+```bash
+python app.py
+```
+
+4. Install ngrok:
+
+- Download from https://ngrok.com/download
+- Sign up for a free account
+- Get your authtoken from the dashboard
+
+5. Start ngrok:
+
+```bash
+ngrok http 5000
+```
+
+6. Copy the ngrok URL (e.g., https://xxxx-xx-xx-xxx-xx.ngrok.io) and update it in the frontend:
+
+- Open `src/services/resumeMatchService.ts`
+- Replace the `baseUrl` with your ngrok URL
+
+### Frontend Setup
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Start the development server:
+
+```bash
+npm run dev
+```
+
+## Usage
+
+1. Open the application in your browser
+2. Go to the talent search feature
+3. Enter a job description
+4. Upload an Excel file with candidate data
+5. The system will process the data and show matching candidates
+
+## Excel File Format
+
+The Excel file should contain the following columns:
+
+- Name
+- Top Skills (comma-separated)
+- Other columns are optional
+
+## Notes
+
+- The backend uses DistilBERT for semantic matching
+- The frontend uses React with TypeScript
+- CORS is enabled for local development
+- The ngrok URL needs to be updated whenever you restart ngrok

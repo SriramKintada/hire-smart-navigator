@@ -34,7 +34,7 @@ const Index = () => {
     excelFile?: File,
     resumeFiles?: File[]
   ) => {
-    await processFiles(excelFile, resumeFiles);
+    await processFiles(excelFile, resumeFiles, query);
   };
 
   const handleDataUploaded = () => {
@@ -42,7 +42,12 @@ const Index = () => {
   };
 
   const handleExternalSearch = (searchQuery: string, filters?: any) => {
-    searchTalent(searchQuery, filters);
+    if (mode === "internal" && hasData) {
+      // Reprocess files with the new search query
+      processFiles(undefined, undefined, searchQuery);
+    } else {
+      searchTalent(searchQuery, filters);
+    }
   };
 
   const hasResults =

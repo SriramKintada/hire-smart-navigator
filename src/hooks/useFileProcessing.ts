@@ -2,6 +2,7 @@ import { useState } from "react";
 import { parseExcelFile } from "@/utils/fileParser";
 import { analyzeResume, ResumeAnalysis } from "@/utils/geminiAnalyzer";
 import { ParsedCandidate } from "@/utils/fileParser";
+import { resumeMatchService } from "@/services/resumeMatchService";
 
 export interface ProcessedCandidate extends ParsedCandidate {
   score: number;
@@ -34,55 +35,70 @@ export const useFileProcessing = () => {
   const [candidates, setCandidates] = useState<ProcessedCandidate[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const processFiles = async (excelFile?: File, resumeFiles?: File[]) => {
+  const processFiles = async (
+    excelFile?: File,
+    resumeFiles?: File[],
+    jobDescription?: string
+  ) => {
     setIsProcessing(true);
     setError(null);
 
     try {
-      let parsedCandidates: ParsedCandidate[] = [];
-      let resumeAnalyses: Record<string, ResumeAnalysis> = {};
+      let processedCandidates: ProcessedCandidate[] = [];
 
-      // Parse Excel file if provided
-      if (excelFile) {
-        parsedCandidates = await parseExcelFile(excelFile);
-      }
+      // If we have a job description and an Excel file, use the resume matching service
+      if (jobDescription && excelFile) {
+        processedCandidates = await resumeMatchService.matchResumes(
+          excelFile,
+          jobDescription
+        );
+      } else {
+        // Original processing logic
+        let parsedCandidates: ParsedCandidate[] = [];
+        let resumeAnalyses: Record<string, ResumeAnalysis> = {};
 
-      // Analyze resume files if provided
-      if (resumeFiles && resumeFiles.length > 0) {
-        for (const file of resumeFiles) {
-          const analysis = await analyzeResume(file);
-          resumeAnalyses[file.name] = analysis;
+        // Parse Excel file if provided
+        if (excelFile) {
+          parsedCandidates = await parseExcelFile(excelFile);
         }
-      }
 
-      // If only resumes provided, create candidates from analyses
-      if (!excelFile && resumeFiles && resumeFiles.length > 0) {
-        parsedCandidates = resumeFiles.map((file, index) => {
-          const analysis = resumeAnalyses[file.name];
-          return {
-            id: index + 1,
-            name:
-              analysis.extracted_resume_data.name ||
-              file.name.replace(/\.(pdf|docx|doc)$/i, "").replace(/[-_]/g, " "),
-            title:
-              analysis.extracted_resume_data.experience[0]?.role ||
-              "Position To Be Determined",
-            skills: analysis.extracted_resume_data.skills,
-            summary: analysis.reasoning.join(" "),
-            experience: analysis.extracted_resume_data.experience
-              .map(
-                (exp) =>
-                  `${exp.role} at ${exp.company} (${exp.start_date} - ${exp.end_date})`
-              )
-              .join("\n"),
-            rawData: { source: "resume", filename: file.name },
-          };
-        });
-      }
+        // Analyze resume files if provided
+        if (resumeFiles && resumeFiles.length > 0) {
+          for (const file of resumeFiles) {
+            const analysis = await analyzeResume(file);
+            resumeAnalyses[file.name] = analysis;
+          }
+        }
 
-      // Process candidates with resume analyses
-      const processedCandidates: ProcessedCandidate[] = parsedCandidates.map(
-        (candidate) => {
+        // If only resumes provided, create candidates from analyses
+        if (!excelFile && resumeFiles && resumeFiles.length > 0) {
+          parsedCandidates = resumeFiles.map((file, index) => {
+            const analysis = resumeAnalyses[file.name];
+            return {
+              id: index + 1,
+              name:
+                analysis.extracted_resume_data.name ||
+                file.name
+                  .replace(/\.(pdf|docx|doc)$/i, "")
+                  .replace(/[-_]/g, " "),
+              title:
+                analysis.extracted_resume_data.experience[0]?.role ||
+                "Position To Be Determined",
+              skills: analysis.extracted_resume_data.skills,
+              summary: analysis.reasoning.join(" "),
+              experience: analysis.extracted_resume_data.experience
+                .map(
+                  (exp) =>
+                    `${exp.role} at ${exp.company} (${exp.start_date} - ${exp.end_date})`
+                )
+                .join("\n"),
+              rawData: { source: "resume", filename: file.name },
+            };
+          });
+        }
+
+        // Process candidates with resume analyses
+        processedCandidates = parsedCandidates.map((candidate) => {
           const resumeAnalysis = resumeAnalyses[Object.keys(resumeAnalyses)[0]];
 
           // Convert resume analysis to timeline format
@@ -109,7 +125,7 @@ export const useFileProcessing = () => {
             ...candidate,
             score: resumeAnalysis.credibility_score,
             scoreBreakdown: {
-              consistency: 0, // These would need to be extracted from the analysis
+              consistency: 0,
               realism: 0,
               detailing: 0,
               education: 0,
@@ -121,8 +137,8 @@ export const useFileProcessing = () => {
             redFlags: resumeAnalysis.red_flags,
             timeline,
           };
-        }
-      );
+        });
+      }
 
       setCandidates(processedCandidates);
       console.log("Processed candidates:", processedCandidates);
@@ -135,10 +151,9 @@ export const useFileProcessing = () => {
   };
 
   return {
-    processFiles,
-    candidates,
     isProcessing,
+    candidates,
     error,
-    setCandidates,
+    processFiles,
   };
 };

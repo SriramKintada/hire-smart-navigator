@@ -65,13 +65,13 @@ export const FileUpload = ({
                 Candidate Data
               </h3>
               <p className="text-sm text-gray-300">
-                Upload Excel file with applicant information
+                Upload Excel or CSV file with applicant information
               </p>
             </div>
             <div className="space-y-3">
               <input
                 type="file"
-                accept=".xlsx,.xls"
+                accept=".xlsx,.xls,.csv"
                 onChange={handleExcelUpload}
                 className="hidden"
                 id="excel-upload"
@@ -84,7 +84,7 @@ export const FileUpload = ({
                 >
                   <span className="cursor-pointer">
                     <Upload className="h-4 w-4 mr-2 text-blue-400" />
-                    Choose Excel File
+                    Choose Excel/CSV File
                   </span>
                 </Button>
               </label>
