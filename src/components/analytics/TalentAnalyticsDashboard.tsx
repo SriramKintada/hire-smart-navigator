@@ -30,6 +30,7 @@ import {
   Area, 
   AreaChart 
 } from 'recharts';
+import { analytics } from '@/lib/analytics';
 
 interface AnalyticsData {
   totalCandidates: number;
