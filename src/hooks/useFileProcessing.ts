@@ -45,6 +45,20 @@ export const useFileProcessing = () => {
     setError(null);
 
     try {
+      // Track file uploads
+      if (excelFile) {
+        analytics.trackResumeUploaded(
+          excelFile.type || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          excelFile.size
+        );
+      }
+      
+      if (resumeFiles) {
+        resumeFiles.forEach(file => {
+          analytics.trackResumeUploaded(file.type, file.size);
+        });
+      }
+
       let processedCandidates: ProcessedCandidate[] = [];
 
       // If we have a job description and an Excel file, use the resume matching service
