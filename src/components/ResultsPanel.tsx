@@ -92,7 +92,7 @@ export const ResultsPanel = ({ mode, query, candidates, externalCandidates = [] 
     }
   };
 
-  // Filter and sort candidates
+  // Filter, sort, and limit to top 10 candidates
   const filteredCandidates = currentCandidates
     .filter(candidate => {
       const name = candidate.name.toLowerCase();
@@ -125,7 +125,8 @@ export const ResultsPanel = ({ mode, query, candidates, externalCandidates = [] 
         default:
           return 0;
       }
-    });
+    })
+    .slice(0, 10); // Limit to top 10 candidates
 
   const renderRedFlags = (candidate: ProcessedCandidate) => {
     if (!candidate.redFlags || candidate.redFlags === 0) return null;
