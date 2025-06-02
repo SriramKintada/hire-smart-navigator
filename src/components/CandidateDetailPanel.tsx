@@ -45,6 +45,8 @@ interface CandidateDetailPanelProps {
 }
 
 export const CandidateDetailPanel = ({ candidate, onClose }: CandidateDetailPanelProps) => {
+  const [showInterviewQuestions, setShowInterviewQuestions] = useState(false);
+
   const getScoreColor = (score: number) => {
     if (score >= 8.5) return "text-green-600";
     if (score >= 7.0) return "text-yellow-600";
