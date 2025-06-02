@@ -3,6 +3,7 @@ import { parseExcelFile } from "@/utils/fileParser";
 import { analyzeResume, ResumeAnalysis } from "@/utils/geminiAnalyzer";
 import { ParsedCandidate } from "@/utils/fileParser";
 import { resumeMatchService } from "@/services/resumeMatchService";
+import { analytics } from "@/lib/analytics";
 
 export interface ProcessedCandidate extends ParsedCandidate {
   score: number;
