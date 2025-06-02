@@ -14,6 +14,7 @@ import { ComparisonPanel } from './ComparisonPanel';
 import { ProcessedCandidate } from '@/hooks/useFileProcessing';
 import { ExternalCandidate } from '@/services/githubApi';
 import { exportService } from '@/services/exportService';
+import { emailService } from '@/services/emailService';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import ExpandableCardDemo from './ui/expandable-card-demo-standard';
 
