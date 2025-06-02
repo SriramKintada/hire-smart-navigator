@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { X, User, MapPin, Mail, Phone, Calendar, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
+import { X, User, MapPin, Mail, Phone, Calendar, TrendingUp, AlertTriangle, CheckCircle, HelpCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SkillHeatmap } from './charts/SkillHeatmap';
 import { ResumeTimeline } from './charts/ResumeTimeline';
 import { ScoreBreakdown } from './charts/ScoreBreakdown';
+import { InterviewQuestionsModal } from './InterviewQuestionsModal';
 
 interface Candidate {
   id: number;
@@ -44,6 +45,8 @@ interface CandidateDetailPanelProps {
 }
 
 export const CandidateDetailPanel = ({ candidate, onClose }: CandidateDetailPanelProps) => {
+  const [showInterviewQuestions, setShowInterviewQuestions] = useState(false);
+
   const getScoreColor = (score: number) => {
     if (score >= 8.5) return "text-green-600";
     if (score >= 7.0) return "text-yellow-600";
@@ -64,8 +67,20 @@ export const CandidateDetailPanel = ({ candidate, onClose }: CandidateDetailPane
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <div className={`text-2xl font-bold ${getScoreColor(candidate.score)}`}>
-              {candidate.score}
+            <div className="flex items-center space-x-2">
+              <div className={`text-2xl font-bold ${getScoreColor(candidate.score)}`}>
+                {candidate.score}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowInterviewQuestions(true)}
+                className="flex items-center space-x-1 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+                title="Generate interview questions for this candidate"
+              >
+                <HelpCircle className="h-4 w-4" />
+                <span className="hidden sm:inline">Interview Questions</span>
+              </Button>
             </div>
             <Button variant="ghost" size="icon" onClick={onClose}>
               <X className="h-4 w-4" />
@@ -154,6 +169,17 @@ export const CandidateDetailPanel = ({ candidate, onClose }: CandidateDetailPane
           </div>
         </CardContent>
       </Card>
+
+      {/* Interview Questions Modal */}
+      {showInterviewQuestions && (
+        <InterviewQuestionsModal
+          candidateName={candidate.name}
+          candidateSkills={candidate.skills}
+          candidateExperience={candidate.experience}
+          candidateSummary={candidate.summary}
+          onClose={() => setShowInterviewQuestions(false)}
+        />
+      )}
     </div>
   );
 };

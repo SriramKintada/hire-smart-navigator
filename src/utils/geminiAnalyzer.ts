@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 declare global {
   interface Window {
@@ -8,11 +8,10 @@ declare global {
   }
 }
 
-const ai = new GoogleGenAI({
-  apiKey:
-    import.meta.env.VITE_GOOGLE_API_KEY ||
-    "AIzaSyDUt1FrShKdTlhr5RGn1zSvPZHIClD7DHg",
-});
+const ai = new GoogleGenerativeAI(
+  import.meta.env.VITE_GOOGLE_API_KEY ||
+  "AIzaSyDUt1FrShKdTlhr5RGn1zSvPZHIClD7DHg"
+);
 
 export interface ResumeAnalysis {
   credibility_score: number;
@@ -165,26 +164,19 @@ A summary of the reasoning behind your credibility score.
 }`;
 
     // Generate content with Gemini
-    const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
-      contents: [
-        {
-          role: "user",
-          parts: [
-            { text: prompt },
-            {
-              inlineData: {
-                mimeType: file.type,
-                data: base64,
-              },
-            },
-          ],
+    const model = ai.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    const response = await model.generateContent([
+      prompt,
+      {
+        inlineData: {
+          mimeType: file.type,
+          data: base64,
         },
-      ],
-    });
+      },
+    ]);
 
     // Parse the response, handling markdown formatting
-    const responseText = response.text;
+    const responseText = response.response.text();
     let jsonStr = responseText;
 
     // Remove markdown code block formatting if present
@@ -224,4 +216,130 @@ async function fileToBase64(file: File): Promise<string> {
     };
     reader.onerror = (error) => reject(error);
   });
+}
+
+export interface InterviewQuestion {
+  question: string;
+  category: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  focus_area: string;
+}
+
+export interface CandidateData {
+  skills: string[];
+  experience: string;
+  summary: string;
+  name: string;
+}
+
+export async function generateInterviewQuestions(candidateData: CandidateData): Promise<InterviewQuestion[]> {
+  try {
+    const { skills, experience, summary, name } = candidateData;
+    
+    const prompt = `You are an expert HR interviewer. Generate 8-10 personalized interview questions for the candidate "${name}" based on their profile.
+
+CANDIDATE PROFILE:
+- Skills: ${skills.join(', ')}
+- Experience: ${experience}
+- Summary: ${summary}
+
+REQUIREMENTS:
+1. Generate exactly 8-10 questions
+2. Mix of technical, behavioral, and situational questions
+3. Questions should be relevant to their specific skills and experience
+4. Include different difficulty levels (Easy, Medium, Hard)
+5. Cover different categories: Technical, Behavioral, Experience, Problem-Solving, Culture Fit
+
+Return ONLY a valid JSON array with this exact format:
+[
+  {
+    "question": "Can you walk me through your experience with [specific technology from their skills]?",
+    "category": "Technical",
+    "difficulty": "Medium",
+    "focus_area": "Technology Experience"
+  }
+]
+
+Make questions specific to their background, not generic. Use their actual skills and experience in the questions.`;
+
+    const model = ai.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    const response = await model.generateContent(prompt);
+    
+    const responseText = response.response.text();
+    let jsonStr = responseText;
+
+    // Remove markdown code block formatting if present
+    if (responseText.includes("```json")) {
+      jsonStr = responseText.split("```json")[1].split("```")[0].trim();
+    } else if (responseText.includes("```")) {
+      jsonStr = responseText.split("```")[1].split("```")[0].trim();
+    }
+
+    // Clean up any potential extra text
+    jsonStr = jsonStr.trim();
+    if (!jsonStr.startsWith('[')) {
+      const arrayStart = jsonStr.indexOf('[');
+      const arrayEnd = jsonStr.lastIndexOf(']');
+      if (arrayStart !== -1 && arrayEnd !== -1) {
+        jsonStr = jsonStr.substring(arrayStart, arrayEnd + 1);
+      }
+    }
+
+    const questions: InterviewQuestion[] = JSON.parse(jsonStr);
+    
+    // Validate the response structure
+    if (!Array.isArray(questions)) {
+      throw new Error('Response is not an array');
+    }
+
+    // Validate each question has required fields
+    const validQuestions = questions.filter(q => 
+      q.question && q.category && q.difficulty && q.focus_area
+    );
+
+    if (validQuestions.length === 0) {
+      throw new Error('No valid questions generated');
+    }
+
+    return validQuestions;
+
+  } catch (error) {
+    console.error('Error generating interview questions:', error);
+    
+    // Fallback questions based on skills
+    const fallbackQuestions: InterviewQuestion[] = [
+      {
+        question: `Tell me about a challenging project you worked on using ${candidateData.skills[0] || 'your technical skills'}.`,
+        category: "Experience",
+        difficulty: "Medium",
+        focus_area: "Project Experience"
+      },
+      {
+        question: "How do you approach problem-solving when faced with a technical challenge?",
+        category: "Problem-Solving",
+        difficulty: "Medium",
+        focus_area: "Technical Approach"
+      },
+      {
+        question: "Describe a time when you had to learn a new technology quickly. How did you approach it?",
+        category: "Behavioral",
+        difficulty: "Medium",
+        focus_area: "Learning Ability"
+      },
+      {
+        question: `What interests you most about working with ${candidateData.skills.slice(0, 2).join(' and ')}?`,
+        category: "Technical",
+        difficulty: "Easy",
+        focus_area: "Technical Interest"
+      },
+      {
+        question: "How do you stay updated with the latest trends in your field?",
+        category: "Culture Fit",
+        difficulty: "Easy",
+        focus_area: "Professional Development"
+      }
+    ];
+
+    return fallbackQuestions;
+  }
 }
