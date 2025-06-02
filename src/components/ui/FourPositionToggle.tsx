@@ -8,6 +8,8 @@ interface FourPositionToggleProps {
 
 const FourPositionToggle = ({ labels, onChange, initial = 0 }: FourPositionToggleProps) => {
   const [activeIndex, setActiveIndex] = useState(initial);
+  
+  console.log('FourPositionToggle loaded with labels:', labels);
 
   useEffect(() => {
     setActiveIndex(initial);
