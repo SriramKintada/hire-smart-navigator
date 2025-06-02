@@ -9,7 +9,7 @@ import { useFileProcessing } from "@/hooks/useFileProcessing";
 import { useExternalSearch } from "@/hooks/useExternalSearch";
 import { ScoreBreakdown } from "@/components/charts/ScoreBreakdown";
 
-export type AppMode = "internal" | "external" | "resume";
+export type AppMode = "internal" | "external" | "resume" | "analytics";
 
 const Index = () => {
   const [mode, setMode] = useState<AppMode>("internal");
