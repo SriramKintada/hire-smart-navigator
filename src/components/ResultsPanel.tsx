@@ -260,7 +260,7 @@ export const ResultsPanel = ({ mode, query, candidates, externalCandidates = [] 
             </div>
             <div className="flex items-center space-x-3">
               <Badge variant="secondary" className="px-3 py-1">
-                {filteredCandidates.length} of {currentCandidates.length} candidates
+                Top {Math.min(filteredCandidates.length, 10)} of {currentCandidates.length} candidates
               </Badge>
               {mode === 'internal' && comparisonCandidates.length === 2 && (
                 <Button 
