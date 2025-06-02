@@ -47,6 +47,14 @@ export const InterviewQuestionsModal = ({
       });
       
       setQuestions(generatedQuestions);
+      
+      // Track analytics for interview questions generation
+      analytics.trackInterviewQuestionsGenerated(
+        candidateName,
+        generatedQuestions.length,
+        candidateSkills
+      );
+      
       toast.success(`Generated ${generatedQuestions.length} interview questions for ${candidateName}`);
     } catch (error) {
       console.error('Error generating questions:', error);
