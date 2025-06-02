@@ -413,8 +413,8 @@ export const ResultsPanel = ({ mode, query, candidates, externalCandidates = [] 
                           <TooltipTrigger asChild>
                             <span className="flex items-center cursor-pointer">
                               <TrendingUp className="h-4 w-4" />
-                              <span className="font-semibold text-lg">{candidate.score}</span>
-                              {candidate.score >= 8 ? (
+                              <span className="font-semibold text-lg">{formatScore(candidate.score)}</span>
+                              {candidate.score * 10 >= 8 ? (
                                 <ArrowUpRight className="h-4 w-4 text-green-500 animate-bounce" />
                               ) : (
                                 <ArrowDownRight className="h-4 w-4 text-red-400 animate-bounce" />
