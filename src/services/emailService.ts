@@ -1,5 +1,6 @@
 import { ProcessedCandidate } from '@/hooks/useFileProcessing';
 import { ExternalCandidate } from './githubApi';
+import { analytics } from '@/lib/analytics';
 
 export interface PersonalizedEmail {
   subject: string;
