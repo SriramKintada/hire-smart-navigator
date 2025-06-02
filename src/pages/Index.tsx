@@ -191,12 +191,18 @@ const Index = () => {
           />
         )}
         {/* Results and Analytics (to be refactored for new UI) */}
-        {hasResults && (
-          <div className="grid grid-cols-1 xl:grid-cols-4 gap-8 max-w-[1600px] mx-auto">
-            <div className="xl:col-span-3">
+        {mode === "analytics" && (
+          <div className="px-4 py-6">
+            <TalentAnalyticsDashboard 
+              candidates={[...candidates, ...externalCandidates]}
+              mode={mode}
+            />
+          </div>
+        )}
+        {mode !== "analytics" && (
+          <div className="grid lg:grid-cols-3 gap-6 px-4 py-6">
+            <div className="lg:col-span-2">
               <ResultsPanel
-                mode={mode}
-                query={query}
                 candidates={candidates}
                 externalCandidates={externalCandidates}
               />
