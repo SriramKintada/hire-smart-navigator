@@ -1,0 +1,149 @@
+import posthog from 'posthog-js';
+
+class AnalyticsService {
+  private initialized = false;
+
+  init() {
+    if (this.initialized) return;
+    
+    const posthogKey = import.meta.env.VITE_POSTHOG_KEY;
+    const posthogHost = import.meta.env.VITE_POSTHOG_HOST || 'https://us.i.posthog.com';
+    
+    if (posthogKey) {
+      posthog.init(posthogKey, {
+        api_host: posthogHost,
+        capture_pageview: false, // We'll manually capture page views
+        session_recording: {
+          maskAllInputs: true
+        },
+        loaded: (ph) => {
+          console.log('PostHog analytics initialized');
+        }
+      });
+      this.initialized = true;
+    }
+  }
+
+  // Track candidate analysis events
+  trackCandidateAnalyzed(candidateData: {
+    score: number;
+    skills: string[];
+    mode: 'internal' | 'external';
+    redFlags: number;
+  }) {
+    if (!this.initialized) return;
+    
+    posthog.capture('candidate_analyzed', {
+      score: candidateData.score,
+      skills_count: candidateData.skills.length,
+      top_skills: candidateData.skills.slice(0, 5),
+      mode: candidateData.mode,
+      red_flags_count: candidateData.redFlags,
+      score_category: this.getScoreCategory(candidateData.score)
+    });
+  }
+
+  // Track resume uploads
+  trackResumeUploaded(fileType: string, fileSize: number) {
+    if (!this.initialized) return;
+    
+    posthog.capture('resume_uploaded', {
+      file_type: fileType,
+      file_size: fileSize,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  // Track interview questions generation
+  trackInterviewQuestionsGenerated(candidateName: string, questionsCount: number, skills: string[]) {
+    if (!this.initialized) return;
+    
+    posthog.capture('interview_questions_generated', {
+      candidate_name: candidateName,
+      questions_count: questionsCount,
+      skills: skills.slice(0, 5),
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  // Track external talent search
+  trackTalentSearch(query: string, resultsCount: number) {
+    if (!this.initialized) return;
+    
+    posthog.capture('talent_search_performed', {
+      query,
+      results_count: resultsCount,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  // Track candidate contacted (for outreach system)
+  trackCandidateContacted(candidateData: {
+    name: string;
+    score: number;
+    skills: string[];
+    contactMethod: 'email' | 'linkedin';
+  }) {
+    if (!this.initialized) return;
+    
+    posthog.capture('candidate_contacted', {
+      candidate_score: candidateData.score,
+      contact_method: candidateData.contactMethod,
+      skills_count: candidateData.skills.length,
+      score_category: this.getScoreCategory(candidateData.score),
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  // Track page views
+  trackPageView(path: string) {
+    if (!this.initialized) return;
+    
+    posthog.capture('$pageview', {
+      path,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  // Track feature usage
+  trackFeatureUsed(feature: string, context?: any) {
+    if (!this.initialized) return;
+    
+    posthog.capture('feature_used', {
+      feature_name: feature,
+      context,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  // Set user properties
+  setUser(userId: string, properties?: any) {
+    if (!this.initialized) return;
+    
+    posthog.identify(userId, properties);
+  }
+
+  private getScoreCategory(score: number): string {
+    if (score >= 8.5) return 'high';
+    if (score >= 7.0) return 'medium';
+    return 'low';
+  }
+
+  // Get analytics data for dashboard
+  async getAnalyticsData() {
+    // This would typically call PostHog's query API
+    // For now, we'll return mock data structure
+    return {
+      totalCandidates: 0,
+      qualifiedCandidates: 0,
+      averageScore: 0,
+      topSkills: [],
+      conversionRate: 0,
+      candidatesBySource: {},
+      scoreDistribution: {},
+      dailyActivity: []
+    };
+  }
+}
+
+export const analytics = new AnalyticsService();
