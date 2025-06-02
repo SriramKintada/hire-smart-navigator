@@ -169,6 +169,17 @@ export const CandidateDetailPanel = ({ candidate, onClose }: CandidateDetailPane
           </div>
         </CardContent>
       </Card>
+
+      {/* Interview Questions Modal */}
+      {showInterviewQuestions && (
+        <InterviewQuestionsModal
+          candidateName={candidate.name}
+          candidateSkills={candidate.skills}
+          candidateExperience={candidate.experience}
+          candidateSummary={candidate.summary}
+          onClose={() => setShowInterviewQuestions(false)}
+        />
+      )}
     </div>
   );
 };
