@@ -8,11 +8,10 @@ declare global {
   }
 }
 
-const ai = new GoogleGenAI({
-  apiKey:
-    import.meta.env.VITE_GOOGLE_API_KEY ||
-    "AIzaSyDUt1FrShKdTlhr5RGn1zSvPZHIClD7DHg",
-});
+const ai = new GoogleGenerativeAI(
+  import.meta.env.VITE_GOOGLE_API_KEY ||
+  "AIzaSyDUt1FrShKdTlhr5RGn1zSvPZHIClD7DHg"
+);
 
 export interface ResumeAnalysis {
   credibility_score: number;
