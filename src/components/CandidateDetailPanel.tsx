@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { X, User, MapPin, Mail, Phone, Calendar, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
+import { X, User, MapPin, Mail, Phone, Calendar, TrendingUp, AlertTriangle, CheckCircle, HelpCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SkillHeatmap } from './charts/SkillHeatmap';
 import { ResumeTimeline } from './charts/ResumeTimeline';
 import { ScoreBreakdown } from './charts/ScoreBreakdown';
+import { InterviewQuestionsModal } from './InterviewQuestionsModal';
 
 interface Candidate {
   id: number;
