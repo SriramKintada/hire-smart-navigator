@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { ModeToggle } from "@/components/ModeToggle";
 import { QueryInterface } from "@/components/QueryInterface";
