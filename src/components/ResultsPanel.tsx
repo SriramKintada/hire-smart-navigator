@@ -431,6 +431,29 @@ export const ResultsPanel = ({ mode, query, candidates, externalCandidates = [] 
                         >
                           View Details
                         </Button>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                emailService.contactCandidate(
+                                  candidate,
+                                  mode,
+                                  'Hiring Team',
+                                  'HireAI Company'
+                                );
+                              }}
+                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            >
+                              <Mail className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <span>Contact via Email</span>
+                          </TooltipContent>
+                        </Tooltip>
                         {mode === 'internal' && (
                           <Button 
                             variant="outline" 
