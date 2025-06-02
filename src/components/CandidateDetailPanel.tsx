@@ -67,8 +67,20 @@ export const CandidateDetailPanel = ({ candidate, onClose }: CandidateDetailPane
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <div className={`text-2xl font-bold ${getScoreColor(candidate.score)}`}>
-              {candidate.score}
+            <div className="flex items-center space-x-2">
+              <div className={`text-2xl font-bold ${getScoreColor(candidate.score)}`}>
+                {candidate.score}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowInterviewQuestions(true)}
+                className="flex items-center space-x-1 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+                title="Generate interview questions for this candidate"
+              >
+                <HelpCircle className="h-4 w-4" />
+                <span className="hidden sm:inline">Interview Questions</span>
+              </Button>
             </div>
             <Button variant="ghost" size="icon" onClick={onClose}>
               <X className="h-4 w-4" />
