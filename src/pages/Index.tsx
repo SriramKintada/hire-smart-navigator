@@ -21,6 +21,16 @@ const Index = () => {
   const [resumeScore, setResumeScore] = useState<any | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Track page views
+  useEffect(() => {
+    analytics.trackPageView('/dashboard');
+  }, []);
+
+  // Track mode changes
+  useEffect(() => {
+    analytics.trackModeSwitch(mode);
+  }, [mode]);
+
   // Internal mode hooks
   const { processFiles, candidates, isProcessing, error } = useFileProcessing();
 
