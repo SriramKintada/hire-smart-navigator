@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { githubApi, ExternalCandidate } from '@/services/githubApi';
+import { analytics } from '@/lib/analytics';
 
 export const useExternalSearch = () => {
   const [candidates, setCandidates] = useState<ExternalCandidate[]>([]);
