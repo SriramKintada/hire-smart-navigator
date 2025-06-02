@@ -32,6 +32,95 @@ class TestResult:
     def __str__(self):
         return f"Success: {self.success}, Message: {self.message}"
 
+def test_backend_root_endpoint() -> TestResult:
+    """
+    Test the backend root endpoint.
+    """
+    result = TestResult()
+    
+    try:
+        response = requests.get(f"{API_URL}/")
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("message") == "Hello World":
+                result.success = True
+                result.message = "Backend root endpoint is working correctly"
+                result.data = data
+            else:
+                result.message = f"Backend root endpoint returned unexpected data: {data}"
+        else:
+            result.message = f"Backend root endpoint request failed with status code {response.status_code}: {response.text}"
+            
+    except Exception as e:
+        result.message = f"Error testing backend root endpoint: {str(e)}"
+        
+    return result
+
+def test_backend_status_post() -> TestResult:
+    """
+    Test the backend status POST endpoint.
+    """
+    result = TestResult()
+    
+    try:
+        # Create a test client name with timestamp to ensure uniqueness
+        client_name = f"test_client_{datetime.utcnow().isoformat()}"
+        
+        # Prepare the request payload
+        payload = {
+            "client_name": client_name
+        }
+        
+        # Make the API request
+        response = requests.post(
+            f"{API_URL}/status",
+            headers={"Content-Type": "application/json"},
+            json=payload
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("client_name") == client_name and "id" in data and "timestamp" in data:
+                result.success = True
+                result.message = "Backend status POST endpoint is working correctly"
+                result.data = data
+            else:
+                result.message = f"Backend status POST endpoint returned unexpected data: {data}"
+        else:
+            result.message = f"Backend status POST endpoint request failed with status code {response.status_code}: {response.text}"
+            
+    except Exception as e:
+        result.message = f"Error testing backend status POST endpoint: {str(e)}"
+        
+    return result
+
+def test_backend_status_get() -> TestResult:
+    """
+    Test the backend status GET endpoint.
+    """
+    result = TestResult()
+    
+    try:
+        # Make the API request
+        response = requests.get(f"{API_URL}/status")
+        
+        if response.status_code == 200:
+            data = response.json()
+            if isinstance(data, list):
+                result.success = True
+                result.message = f"Backend status GET endpoint is working correctly, returned {len(data)} status checks"
+                result.data = data
+            else:
+                result.message = f"Backend status GET endpoint returned unexpected data type: {type(data)}"
+        else:
+            result.message = f"Backend status GET endpoint request failed with status code {response.status_code}: {response.text}"
+            
+    except Exception as e:
+        result.message = f"Error testing backend status GET endpoint: {str(e)}"
+        
+    return result
+
 def test_gemini_interview_questions_generation() -> TestResult:
     """
     Test the Gemini AI integration for generating interview questions.
@@ -214,41 +303,79 @@ def run_tests():
     """
     Run all tests and print the results.
     """
-    print("=== Testing Gemini AI Integration for Interview Questions ===")
+    print("=== Testing Backend API Endpoints ===")
     
-    # Test 1: Generate interview questions
-    print("\nTest 1: Generate Interview Questions")
-    result1 = test_gemini_interview_questions_generation()
-    print(f"Success: {result1.success}")
-    print(f"Message: {result1.message}")
-    if result1.success and result1.data:
-        print(f"Generated {len(result1.data)} questions")
+    # Test 1: Backend Root Endpoint
+    print("\nTest 1: Backend Root Endpoint")
+    result_root = test_backend_root_endpoint()
+    print(f"Success: {result_root.success}")
+    print(f"Message: {result_root.message}")
+    
+    # Test 2: Backend Status POST Endpoint
+    print("\nTest 2: Backend Status POST Endpoint")
+    result_status_post = test_backend_status_post()
+    print(f"Success: {result_status_post.success}")
+    print(f"Message: {result_status_post.message}")
+    
+    # Test 3: Backend Status GET Endpoint
+    print("\nTest 3: Backend Status GET Endpoint")
+    result_status_get = test_backend_status_get()
+    print(f"Success: {result_status_get.success}")
+    print(f"Message: {result_status_get.message}")
+    
+    print("\n=== Testing Gemini AI Integration for Interview Questions ===")
+    
+    # Test 4: Generate interview questions
+    print("\nTest 4: Generate Interview Questions")
+    result_questions = test_gemini_interview_questions_generation()
+    print(f"Success: {result_questions.success}")
+    print(f"Message: {result_questions.message}")
+    if result_questions.success and result_questions.data:
+        print(f"Generated {len(result_questions.data)} questions")
         # Print a sample of the questions
-        for i, question in enumerate(result1.data[:3]):
+        for i, question in enumerate(result_questions.data[:3]):
             print(f"  {i+1}. {question['question']} ({question['category']}, {question['difficulty']})")
-        if len(result1.data) > 3:
-            print(f"  ... and {len(result1.data) - 3} more questions")
+        if len(result_questions.data) > 3:
+            print(f"  ... and {len(result_questions.data) - 3} more questions")
     
-    # Test 2: Error handling
-    print("\nTest 2: Error Handling")
-    result2 = test_gemini_error_handling()
-    print(f"Success: {result2.success}")
-    print(f"Message: {result2.message}")
+    # Test 5: Error handling
+    print("\nTest 5: Error Handling")
+    result_error = test_gemini_error_handling()
+    print(f"Success: {result_error.success}")
+    print(f"Message: {result_error.message}")
     
     # Overall result
-    overall_success = result1.success and result2.success
+    overall_success = (
+        result_root.success and 
+        result_status_post.success and 
+        result_status_get.success and 
+        result_questions.success and 
+        result_error.success
+    )
     print("\n=== Overall Result ===")
     print(f"Success: {overall_success}")
     
     return overall_success, {
+        "backend_root": {
+            "success": result_root.success,
+            "message": result_root.message
+        },
+        "backend_status_post": {
+            "success": result_status_post.success,
+            "message": result_status_post.message
+        },
+        "backend_status_get": {
+            "success": result_status_get.success,
+            "message": result_status_get.message
+        },
         "generate_questions": {
-            "success": result1.success,
-            "message": result1.message,
-            "data": result1.data
+            "success": result_questions.success,
+            "message": result_questions.message,
+            "data": result_questions.data
         },
         "error_handling": {
-            "success": result2.success,
-            "message": result2.message
+            "success": result_error.success,
+            "message": result_error.message
         }
     }
 
