@@ -164,23 +164,16 @@ A summary of the reasoning behind your credibility score.
 }`;
 
     // Generate content with Gemini
-    const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
-      contents: [
-        {
-          role: "user",
-          parts: [
-            { text: prompt },
-            {
-              inlineData: {
-                mimeType: file.type,
-                data: base64,
-              },
-            },
-          ],
+    const model = ai.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    const response = await model.generateContent([
+      prompt,
+      {
+        inlineData: {
+          mimeType: file.type,
+          data: base64,
         },
-      ],
-    });
+      },
+    ]);
 
     // Parse the response, handling markdown formatting
     const responseText = response.text;
