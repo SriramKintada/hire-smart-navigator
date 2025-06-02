@@ -14,7 +14,22 @@ import {
   Mail,
   Filter
 } from 'lucide-react';
-import { LineChart, Line, BarChart as RechartsBarChart, Bar, PieChart as RechartsPieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
+import { 
+  LineChart, 
+  Line, 
+  BarChart as RechartsBarChart, 
+  Bar, 
+  PieChart as RechartsPieChart, 
+  Pie, 
+  Cell, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer, 
+  Area, 
+  AreaChart 
+} from 'recharts';
 
 interface AnalyticsData {
   totalCandidates: number;
