@@ -341,6 +341,22 @@ export const ResultsPanel = ({ mode, query, candidates, externalCandidates = [] 
 
           {/* Results */}
           <div className="space-y-4">
+            {/* Top 10 indicator */}
+            {currentCandidates.length > 0 && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                <div className="flex items-center space-x-2 text-blue-800">
+                  <Award className="h-5 w-5" />
+                  <span className="font-medium">
+                    Showing Top {Math.min(filteredCandidates.length, 10)} Candidates 
+                    {currentCandidates.length > 10 && ` (out of ${currentCandidates.length} total)`}
+                  </span>
+                </div>
+                <p className="text-sm text-blue-600 mt-1">
+                  Automatically sorted by highest compatibility scores
+                </p>
+              </div>
+            )}
+            
             {filteredCandidates.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 {currentCandidates.length === 0 
