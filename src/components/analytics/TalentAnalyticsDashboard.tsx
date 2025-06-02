@@ -104,6 +104,37 @@ export const TalentAnalyticsDashboard = ({ candidates, mode }: TalentAnalyticsDa
 
   const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300'];
 
+  // Helper function to calculate top skills
+  const getTopSkills = (candidates: (ProcessedCandidate | ExternalCandidate)[]) => {
+    const skillsMap: Record<string, number> = {};
+    candidates.forEach(candidate => {
+      candidate.skills?.forEach((skill: string) => {
+        skillsMap[skill] = (skillsMap[skill] || 0) + 1;
+      });
+    });
+    
+    return Object.entries(skillsMap)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 10)
+      .map(([skill, count]) => ({ skill, count }));
+  };
+
+  // Helper function to generate daily activity data
+  const generateDailyActivity = () => {
+    const now = new Date();
+    const data = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(now);
+      date.setDate(date.getDate() - i);
+      data.push({
+        date: date.toISOString().split('T')[0],
+        candidates: Math.floor(Math.random() * 15) + 5,
+        contacted: Math.floor(Math.random() * 8) + 1
+      });
+    }
+    return data;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
