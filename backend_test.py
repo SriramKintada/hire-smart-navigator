@@ -4,10 +4,24 @@ import json
 import os
 import sys
 from typing import Dict, List, Any, Optional
+from datetime import datetime
 
 # Test configuration
 GEMINI_API_KEY = "AIzaSyDUt1FrShKdTlhr5RGn1zSvPZHIClD7DHg"  # Using the fallback key from geminiAnalyzer.ts
 GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent"
+
+# Get the backend URL from the frontend .env file
+with open('/app/frontend/.env', 'r') as f:
+    for line in f:
+        if line.startswith('REACT_APP_BACKEND_URL='):
+            BACKEND_URL = line.strip().split('=')[1].strip('"\'')
+            break
+
+# Ensure the backend URL is properly formatted
+if BACKEND_URL.endswith('/'):
+    BACKEND_URL = BACKEND_URL[:-1]
+
+API_URL = f"{BACKEND_URL}/api"
 
 class TestResult:
     def __init__(self):
