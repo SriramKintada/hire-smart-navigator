@@ -52,9 +52,9 @@ export const TalentAnalyticsDashboard = ({ candidates, mode }: TalentAnalyticsDa
   // Enhanced analytics data with real-time tracking
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({
     totalCandidates: candidates.length,
-    qualifiedCandidates: candidates.filter(c => c.score >= 7.5).length,
+    qualifiedCandidates: candidates.filter(c => (c.score * 10) >= 7.5).length, // Convert to 0-10 scale
     averageScore: candidates.length > 0 
-      ? candidates.reduce((sum, c) => sum + c.score, 0) / candidates.length 
+      ? candidates.reduce((sum, c) => sum + (c.score * 10), 0) / candidates.length // Convert to 0-10 scale
       : 0,
     topSkills: getTopSkills(candidates),
     conversionRate: Math.random() * 15 + 5, // Mock for now
@@ -65,9 +65,9 @@ export const TalentAnalyticsDashboard = ({ candidates, mode }: TalentAnalyticsDa
       'Internal Referral': Math.floor(Math.random() * 5)
     },
     scoreDistribution: {
-      'High (8.5+)': candidates.filter(c => c.score >= 8.5).length,
-      'Medium (7-8.4)': candidates.filter(c => c.score >= 7 && c.score < 8.5).length,
-      'Low (<7)': candidates.filter(c => c.score < 7).length
+      'High (8.5+)': candidates.filter(c => (c.score * 10) >= 8.5).length,
+      'Medium (7-8.4)': candidates.filter(c => (c.score * 10) >= 7 && (c.score * 10) < 8.5).length,
+      'Low (<7)': candidates.filter(c => (c.score * 10) < 7).length
     },
     dailyActivity: generateDailyActivity()
   });
@@ -81,9 +81,9 @@ export const TalentAnalyticsDashboard = ({ candidates, mode }: TalentAnalyticsDa
   useEffect(() => {
     setAnalyticsData({
       totalCandidates: candidates.length,
-      qualifiedCandidates: candidates.filter(c => c.score >= 7.5).length,
+      qualifiedCandidates: candidates.filter(c => (c.score * 10) >= 7.5).length, // Convert to 0-10 scale
       averageScore: candidates.length > 0 
-        ? Math.round((candidates.reduce((sum, c) => sum + c.score, 0) / candidates.length) * 10) / 10
+        ? Math.round((candidates.reduce((sum, c) => sum + (c.score * 10), 0) / candidates.length) * 10) / 10 // Convert to 0-10 scale
         : 0,
       topSkills: getTopSkills(candidates),
       conversionRate: Math.random() * 15 + 5, // Mock for now
@@ -94,9 +94,9 @@ export const TalentAnalyticsDashboard = ({ candidates, mode }: TalentAnalyticsDa
         'Internal Referral': Math.floor(Math.random() * 5)
       },
       scoreDistribution: {
-        'High (8.5+)': candidates.filter(c => c.score >= 8.5).length,
-        'Medium (7-8.4)': candidates.filter(c => c.score >= 7 && c.score < 8.5).length,
-        'Low (<7)': candidates.filter(c => c.score < 7).length
+        'High (8.5+)': candidates.filter(c => (c.score * 10) >= 8.5).length,
+        'Medium (7-8.4)': candidates.filter(c => (c.score * 10) >= 7 && (c.score * 10) < 8.5).length,
+        'Low (<7)': candidates.filter(c => (c.score * 10) < 7).length
       },
       dailyActivity: generateDailyActivity()
     });
