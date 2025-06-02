@@ -159,10 +159,15 @@ export const TalentAnalyticsDashboard = ({ candidates, mode }: TalentAnalyticsDa
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Conversion Rate</p>
-                <p className="text-2xl font-bold text-purple-600">{analyticsData.conversionRate}%</p>
+                <p className="text-sm text-gray-600">Real-time Activity</p>
+                <p className="text-2xl font-bold text-green-600">Live</p>
+                <div className="mt-2 space-y-1 text-xs text-green-700">
+                  <div>📧 Email contacts: Tracked</div>
+                  <div>🧠 Interview Q's: Tracked</div>
+                  <div>📊 Mode switches: Tracked</div>
+                </div>
               </div>
-              <Target className="h-8 w-8 text-purple-600" />
+              <Activity className="h-8 w-8 text-green-600" />
             </div>
           </CardContent>
         </Card>
