@@ -176,7 +176,7 @@ A summary of the reasoning behind your credibility score.
     ]);
 
     // Parse the response, handling markdown formatting
-    const responseText = response.text;
+    const responseText = response.response.text();
     let jsonStr = responseText;
 
     // Remove markdown code block formatting if present
