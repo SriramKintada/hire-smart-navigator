@@ -40,15 +40,24 @@ export const ResultsPanel = ({ mode, query, candidates, externalCandidates = [] 
   const currentCandidates = mode === 'internal' ? candidates : externalCandidates;
 
   const getScoreColor = (score: number) => {
-    if (score >= 8.5) return "text-green-600 bg-green-50";
-    if (score >= 7.0) return "text-yellow-600 bg-yellow-50";
+    // Convert decimal score to 0-10 scale
+    const scaledScore = score * 10;
+    if (scaledScore >= 8.5) return "text-green-600 bg-green-50";
+    if (scaledScore >= 7.0) return "text-yellow-600 bg-yellow-50";
     return "text-red-600 bg-red-50";
   };
 
   const getScoreCategory = (score: number) => {
-    if (score >= 8.5) return 'high';
-    if (score >= 7.0) return 'medium';
+    // Convert decimal score to 0-10 scale
+    const scaledScore = score * 10;
+    if (scaledScore >= 8.5) return 'high';
+    if (scaledScore >= 7.0) return 'medium';
     return 'low';
+  };
+
+  const formatScore = (score: number) => {
+    // Convert decimal score to readable format (0.65 -> 6.5)
+    return (score * 10).toFixed(1);
   };
 
   const handleComparisonToggle = (candidate: ProcessedCandidate) => {
