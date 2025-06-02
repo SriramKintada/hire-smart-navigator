@@ -142,6 +142,17 @@ export const useFileProcessing = () => {
       }
 
       setCandidates(processedCandidates);
+      
+      // Track analytics for each processed candidate
+      processedCandidates.forEach((candidate) => {
+        analytics.trackCandidateAnalyzed({
+          score: candidate.score,
+          skills: candidate.skills || [],
+          mode: 'internal',
+          redFlags: candidate.redFlags?.length || 0
+        });
+      });
+      
       console.log("Processed candidates:", processedCandidates);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to process files");
