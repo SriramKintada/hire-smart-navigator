@@ -1,14 +1,24 @@
-
-import { useState } from 'react';
-import { X, User, MapPin, Mail, Phone, Calendar, TrendingUp, AlertTriangle, CheckCircle, HelpCircle } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { SkillHeatmap } from './charts/SkillHeatmap';
-import { ResumeTimeline } from './charts/ResumeTimeline';
-import { ScoreBreakdown } from './charts/ScoreBreakdown';
-import { InterviewQuestionsModal } from './InterviewQuestionsModal';
+import { useState } from "react";
+import {
+  X,
+  User,
+  MapPin,
+  Mail,
+  Phone,
+  Calendar,
+  TrendingUp,
+  AlertTriangle,
+  CheckCircle,
+  HelpCircle,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SkillHeatmap } from "./charts/SkillHeatmap";
+import { ResumeTimeline } from "./charts/ResumeTimeline";
+import { ScoreBreakdown } from "./charts/ScoreBreakdown";
+import { InterviewQuestionsModal } from "./InterviewQuestionsModal";
 
 interface Candidate {
   id: number;
@@ -30,7 +40,7 @@ interface Candidate {
     verifiability: number;
   };
   timeline: Array<{
-    type: 'work' | 'education';
+    type: "work" | "education";
     title: string;
     company: string;
     startDate: string;
@@ -44,7 +54,10 @@ interface CandidateDetailPanelProps {
   onClose: () => void;
 }
 
-export const CandidateDetailPanel = ({ candidate, onClose }: CandidateDetailPanelProps) => {
+export const CandidateDetailPanel = ({
+  candidate,
+  onClose,
+}: CandidateDetailPanelProps) => {
   const [showInterviewQuestions, setShowInterviewQuestions] = useState(false);
 
   const getScoreColor = (score: number) => {
@@ -68,7 +81,11 @@ export const CandidateDetailPanel = ({ candidate, onClose }: CandidateDetailPane
           </div>
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <div className={`text-2xl font-bold ${getScoreColor(candidate.score)}`}>
+              <div
+                className={`text-2xl font-bold ${getScoreColor(
+                  candidate.score
+                )}`}
+              >
                 {candidate.score}
               </div>
               <Button
@@ -118,11 +135,16 @@ export const CandidateDetailPanel = ({ candidate, onClose }: CandidateDetailPane
                 <CardContent className="pt-4">
                   <div className="flex items-center space-x-2 text-red-600">
                     <AlertTriangle className="h-5 w-5" />
-                    <span className="font-medium">{candidate.redFlags} Red Flag{candidate.redFlags > 1 ? 's' : ''} Detected</span>
+                    <span className="font-medium">
+                      {candidate.redFlags} Red Flag
+                      {candidate.redFlags > 1 ? "s" : ""} Detected
+                    </span>
                   </div>
                   <ul className="mt-2 text-sm text-red-700 space-y-1">
                     <li>• Employment gap detected (2019-2020)</li>
-                    {candidate.redFlags > 1 && <li>• High buzzword usage in technical sections</li>}
+                    {candidate.redFlags > 1 && (
+                      <li>• High buzzword usage in technical sections</li>
+                    )}
                   </ul>
                 </CardContent>
               </Card>
