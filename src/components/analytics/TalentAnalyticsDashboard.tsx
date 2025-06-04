@@ -31,6 +31,44 @@ import {
   AreaChart 
 } from 'recharts';
 import { analytics } from '@/lib/analytics';
+import { ProcessedCandidate } from '@/hooks/useFileProcessing';
+import { ExternalCandidate } from '@/services/githubApi';
+
+// Helper function to calculate top skills
+const getTopSkills = (candidates: (ProcessedCandidate | ExternalCandidate)[]): Array<{ skill: string; count: number }> => {
+  const skillsMap: Record<string, number> = {};
+  candidates.forEach(candidate => {
+    candidate.skills?.forEach((skill: string) => {
+      skillsMap[skill] = (skillsMap[skill] || 0) + 1;
+    });
+  });
+  
+  return Object.entries(skillsMap)
+    .sort(([,a], [,b]) => b - a)
+    .slice(0, 10)
+    .map(([skill, count]) => ({ skill, count }));
+};
+
+// Mock function to generate daily activity
+const generateDailyActivity = () => {
+  const activity = [];
+  const today = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(today.getDate() - i);
+    activity.push({
+      date: date.toISOString().split('T')[0],
+      candidates: Math.floor(Math.random() * 50) + 10,
+      contacted: Math.floor(Math.random() * 30) + 5,
+    });
+  }
+  return activity;
+};
+
+interface TalentAnalyticsDashboardProps {
+  candidates: (ProcessedCandidate | ExternalCandidate)[];
+  mode: "internal" | "external" | "resume" | "analytics";
+}
 
 interface AnalyticsData {
   totalCandidates: number;
@@ -41,11 +79,6 @@ interface AnalyticsData {
   candidatesBySource: Record<string, number>;
   scoreDistribution: Record<string, number>;
   dailyActivity: Array<{ date: string; candidates: number; contacted: number }>;
-}
-
-interface TalentAnalyticsDashboardProps {
-  candidates: any[];
-  mode: 'internal' | 'external';
 }
 
 export const TalentAnalyticsDashboard = ({ candidates, mode }: TalentAnalyticsDashboardProps) => {
@@ -104,35 +137,11 @@ export const TalentAnalyticsDashboard = ({ candidates, mode }: TalentAnalyticsDa
 
   const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300'];
 
-  // Helper function to calculate top skills
-  const getTopSkills = (candidates: (ProcessedCandidate | ExternalCandidate)[]) => {
-    const skillsMap: Record<string, number> = {};
-    candidates.forEach(candidate => {
-      candidate.skills?.forEach((skill: string) => {
-        skillsMap[skill] = (skillsMap[skill] || 0) + 1;
-      });
-    });
-    
-    return Object.entries(skillsMap)
-      .sort(([,a], [,b]) => b - a)
-      .slice(0, 10)
-      .map(([skill, count]) => ({ skill, count }));
-  };
-
-  // Helper function to generate daily activity data
-  const generateDailyActivity = () => {
-    const now = new Date();
-    const data = [];
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(now);
-      date.setDate(date.getDate() - i);
-      data.push({
-        date: date.toISOString().split('T')[0],
-        candidates: Math.floor(Math.random() * 15) + 5,
-        contacted: Math.floor(Math.random() * 8) + 1
-      });
-    }
-    return data;
+  // Helper function to determine score color
+  const getScoreColor = (score: number) => {
+    if (score >= 8.5) return 'text-green-500';
+    if (score >= 7) return 'text-yellow-500';
+    return 'text-red-500';
   };
 
   return (

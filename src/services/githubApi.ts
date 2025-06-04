@@ -1,17 +1,16 @@
-
 export interface GitHubUser {
   id: number;
   login: string;
-  name: string;
+  name?: string;
   avatar_url: string;
-  bio: string;
-  location: string;
-  email: string;
-  blog: string;
-  public_repos: number;
-  followers: number;
-  following: number;
-  created_at: string;
+  bio?: string;
+  location?: string;
+  email?: string;
+  blog?: string;
+  public_repos?: number;
+  followers?: number;
+  following?: number;
+  created_at?: string;
 }
 
 export interface GitHubRepo {
@@ -44,22 +43,22 @@ export interface ExternalCandidate {
   name: string;
   username: string;
   avatar: string;
-  bio: string;
-  location: string;
-  email: string;
-  blog: string;
+  bio?: string;
+  location?: string;
+  email?: string;
+  blog?: string;
   githubUrl: string;
   score: number;
   skills: string[];
-  repositories: GitHubRepo[];
-  totalCommits: number;
-  totalStars: number;
-  totalForks: number;
-  accountAge: number;
-  lastActivity: string;
-  contributionScore: number;
-  codeQualityScore: number;
-  projectDiversityScore: number;
+  repositories?: GitHubRepo[];
+  totalCommits?: number;
+  totalStars?: number;
+  totalForks?: number;
+  accountAge?: number;
+  lastActivity?: string;
+  contributionScore?: number;
+  codeQualityScore?: number;
+  projectDiversityScore?: number;
 }
 
 class GitHubApiService {
@@ -80,13 +79,17 @@ class GitHubApiService {
         throw new Error(data.message || 'Failed to search users');
       }
       
-      const candidates = await Promise.all(
-        data.items.slice(0, 10).map(async (user: any) => {
-          return await this.getUserDetails(user.login);
-        })
-      );
+      const candidates: ExternalCandidate[] = data.items.map((user: any) => ({
+        id: user.id.toString(),
+        name: user.login,
+        username: user.login,
+        avatar: user.avatar_url,
+        githubUrl: user.html_url,
+        score: 0,
+        skills: [],
+      }));
       
-      return candidates.filter(Boolean);
+      return candidates;
     } catch (error) {
       console.error('GitHub API search error:', error);
       return this.getMockExternalCandidates(query);
@@ -151,8 +154,8 @@ class GitHubApiService {
   }
   
   private calculateGitHubScores(user: GitHubUser, repos: GitHubRepo[]) {
-    const contribution = Math.min(10, (user.public_repos * 0.1) + (user.followers * 0.05));
-    const codeQuality = Math.min(10, repos.reduce((sum, repo) => sum + repo.stargazers_count, 0) * 0.01);
+    const contribution = Math.min(10, (user.public_repos || 0) * 0.1 + (user.followers || 0) * 0.05);
+    const codeQuality = Math.min(10, (repos.reduce((sum, repo) => sum + repo.stargazers_count, 0) || 0) * 0.01);
     const projectDiversity = Math.min(10, new Set(repos.map(r => r.language)).size * 0.5);
     const overall = (contribution + codeQuality + projectDiversity) / 3;
     

@@ -1,16 +1,20 @@
 import { useState, useRef, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { ModeToggle } from "@/components/ModeToggle";
-import { QueryInterface } from "@/components/QueryInterface";
+import { InternalQueryInterface } from "@/components/InternalQueryInterface";
+import { ExternalQueryInterface } from "@/components/ExternalQueryInterface";
 import { FileUpload } from "@/components/FileUpload";
 import { ResultsPanel } from "@/components/ResultsPanel";
 import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
 import { TalentAnalyticsDashboard } from "@/components/analytics/TalentAnalyticsDashboard";
-import { useFileProcessing } from "@/hooks/useFileProcessing";
+import { useFileProcessing, ProcessedCandidate } from "@/hooks/useFileProcessing";
 import { useExternalSearch } from "@/hooks/useExternalSearch";
+import { ExternalCandidate, githubApi } from "@/services/githubApi";
 import { ScoreBreakdown } from "@/components/charts/ScoreBreakdown";
 import { analytics } from "@/lib/analytics";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ExternalCandidatePanel } from "@/components/ExternalCandidatePanel";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export type AppMode = "internal" | "external" | "resume" | "analytics";
 
@@ -21,6 +25,10 @@ const Index = () => {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [resumeScore, setResumeScore] = useState<any | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [selectedExternalCandidate, setSelectedExternalCandidate] = useState<ExternalCandidate | null>(null);
+  const [isFetchingDetails, setIsFetchingDetails] = useState(false);
+  const [detailsError, setDetailsError] = useState<string | null>(null);
 
   // Track page views
   useEffect(() => {
@@ -49,13 +57,39 @@ const Index = () => {
     setHasData(true);
   };
 
+  const handleInternalSearch = (searchQuery: string) => {
+    // Logic for searching/filtering internal data goes here
+    // This might involve filtering the existing 'candidates' array
+    processFiles(undefined, undefined, searchQuery);
+  };
+
   const handleExternalSearch = (searchQuery: string, filters?: any) => {
-    if (mode === "internal" && hasData) {
-      // Reprocess files with the new search query
-      processFiles(undefined, undefined, searchQuery);
-    } else {
-      searchTalent(searchQuery, filters);
+    searchTalent(searchQuery, filters);
+  };
+
+  // Handle selecting an external candidate to view details
+  const handleExternalCandidateSelect = async (candidate: ExternalCandidate) => {
+    setIsFetchingDetails(true);
+    setDetailsError(null);
+    setSelectedExternalCandidate(null); // Clear previous details
+    try {
+      const fullDetails = await githubApi.getUserDetails(candidate.username);
+      if (fullDetails) {
+        setSelectedExternalCandidate(fullDetails);
+      } else {
+        setDetailsError("Could not fetch full candidate details.");
+      }
+    } catch (err) {
+      setDetailsError(err instanceof Error ? err.message : "Failed to fetch candidate details");
+      console.error("Fetch candidate details error:", err);
+    } finally {
+      setIsFetchingDetails(false);
     }
+  };
+
+  const handleCloseExternalCandidateDetails = () => {
+    setSelectedExternalCandidate(null);
+    setDetailsError(null);
   };
 
   const hasResults =
@@ -98,29 +132,36 @@ const Index = () => {
           </div>
 
           {/* Query Interface */}
-          <QueryInterface
-            mode={mode}
-            query={query}
-            onQueryChange={setQuery}
-            onSearch={handleExternalSearch}
-          />
+          {mode === "internal" ? (
+            <InternalQueryInterface
+              query={query}
+              onQueryChange={setQuery}
+              onSearch={handleInternalSearch}
+            />
+          ) : mode === "external" ? (
+            <ExternalQueryInterface
+              query={query}
+              onQueryChange={setQuery}
+              onSearch={handleExternalSearch}
+            />
+          ) : null} {/* Add other modes if they have query interfaces */}
 
           {/* Loading States */}
-          {(isProcessing || isSearching) && (
+          {(isProcessing || isSearching || isFetchingDetails) && (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mx-auto mb-2"></div>
               <p className="text-gray-300">
                 {isProcessing
                   ? "Processing files..."
-                  : "Searching for talent..."}
+                  : isSearching ? "Searching for talent..." : "Fetching candidate details..."}
               </p>
             </div>
           )}
 
           {/* Error Display */}
-          {displayError && (
+          {(displayError || detailsError) && (
             <div className="bg-red-900/30 border border-red-700 rounded-lg p-4">
-              <p className="text-red-300">{displayError}</p>
+              <p className="text-red-300">{displayError || detailsError}</p>
             </div>
           )}
 
@@ -150,6 +191,7 @@ const Index = () => {
                   query={query}
                   candidates={candidates}
                   externalCandidates={externalCandidates}
+                  onExternalCandidateClick={handleExternalCandidateSelect}
                 />
               </div>
               <div>
@@ -162,6 +204,18 @@ const Index = () => {
           )}
         </div>
       </div>
+
+      {/* External Candidate Details Modal */}
+      <Dialog open={!!selectedExternalCandidate} onOpenChange={handleCloseExternalCandidateDetails}>
+        <DialogContent className="sm:max-w-[800px]">
+          <DialogHeader>
+            <DialogTitle>Candidate Details</DialogTitle>
+          </DialogHeader>
+          {selectedExternalCandidate && (
+            <ExternalCandidatePanel candidate={selectedExternalCandidate} onClose={handleCloseExternalCandidateDetails} />
+          )}
+        </DialogContent>
+      </Dialog>
     </ErrorBoundary>
   );
 };

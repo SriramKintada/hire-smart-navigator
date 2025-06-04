@@ -29,6 +29,7 @@ export interface ProcessedCandidate extends ParsedCandidate {
     endDate: string;
     description: string;
   }>;
+  avatar?: string;
 }
 
 export const useFileProcessing = () => {
@@ -151,6 +152,7 @@ export const useFileProcessing = () => {
             },
             redFlags: resumeAnalysis.red_flags,
             timeline,
+            avatar: "https://randomuser.me/api/portraits/men/32.jpg"
           };
         });
       }

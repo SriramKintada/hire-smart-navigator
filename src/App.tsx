@@ -6,7 +6,8 @@ import { Routes, Route, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import Hero from "./pages/Hero";
+import Landing from "./pages/Landing";
+import DarkThemeWrapper from "@/components/DarkThemeWrapper";
 import { analytics } from "./lib/analytics";
 
 const queryClient = new QueryClient();
@@ -25,8 +26,8 @@ const App = () => {
         <Toaster />
         <Sonner />
         <Routes>
-          <Route path="/" element={<Hero onStart={() => navigate('/dashboard')} />} />
-          <Route path="/dashboard" element={<Index />} />
+          <Route path="/" element={<DarkThemeWrapper><Landing /></DarkThemeWrapper>} />
+          <Route path="/app" element={<Index />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
